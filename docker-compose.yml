@@ -1,0 +1,95 @@
+services:
+  # MongoDB instances — one per service
+  mongo-upload:
+    image: mongo:7
+    container_name: mongo-upload
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-upload-data:/data/db
+    networks:
+      - interview-net
+
+  mongo-transcription:
+    image: mongo:7
+    container_name: mongo-transcription
+    ports:
+      - '27018:27017'
+    volumes:
+      - mongo-transcription-data:/data/db
+    networks:
+      - interview-net
+
+  mongo-feedback:
+    image: mongo:7
+    container_name: mongo-feedback
+    ports:
+      - '27019:27017'
+    volumes:
+      - mongo-feedback-data:/data/db
+    networks:
+      - interview-net
+
+  mongo-scheduling:
+    image: mongo:7
+    container_name: mongo-scheduling
+    ports:
+      - '27020:27017'
+    volumes:
+      - mongo-scheduling-data:/data/db
+    networks:
+      - interview-net
+
+  mongo-analytics:
+    image: mongo:7
+    container_name: mongo-analytics
+    ports:
+      - '27021:27017'
+    volumes:
+      - mongo-analytics-data:/data/db
+    networks:
+      - interview-net
+
+  # RabbitMQ — message broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'    # AMQP protocol
+      - '15672:15672'  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - interview-net
+
+  # MinIO — S3-compatible object storage for videos
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - '9000:9000'   # S3 API
+      - '9001:9001'   # Admin console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - interview-net
+
+volumes:
+  mongo-upload-data:
+  mongo-transcription-data:
+  mongo-feedback-data:
+  mongo-scheduling-data:
+  mongo-analytics-data:
+  rabbitmq-data:
+  minio-data:
+
+networks:
+  interview-net:
+    driver: bridge

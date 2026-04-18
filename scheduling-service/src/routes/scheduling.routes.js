@@ -1,0 +1,18 @@
+const express = require('express');
+const router = express.Router();
+const schedulingController = require('../controllers/scheduling.controller');
+
+// Sessions
+router.post('/sessions', schedulingController.createSession);
+router.get('/sessions', schedulingController.listSessions);
+router.get('/sessions/:sessionId', schedulingController.getSession);
+
+// Question sets
+router.post('/question-sets', schedulingController.createQuestionSet);
+router.get('/question-sets/:id', schedulingController.getQuestionSet);
+
+// Candidate assignments
+router.post('/assignments', schedulingController.createAssignment);
+router.get('/assignments/:token', schedulingController.getAssignmentByToken);
+
+module.exports = router;
