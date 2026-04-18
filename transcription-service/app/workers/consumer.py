@@ -28,6 +28,8 @@ def handle_video_uploaded(ch, method, properties, body):
     db = get_db()
     transcript_doc = {
         'video_id': video_id,
+        'session_id': session_id,
+        'candidate_id': candidate_id,
         'full_text': result['text'],
         'language': result.get('language', 'en'),
         'duration_seconds': 0,

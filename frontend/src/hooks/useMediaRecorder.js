@@ -21,7 +21,13 @@ export function useMediaRecorder(sessionId, candidateId) {
 
   async function startRecording(existingStream) {
     const stream = existingStream || await getFallbackUserMedia();
-    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    // Pick the best mimeType that includes audio (opus) so Whisper has audio to transcribe
+    const mimeType = [
+      'video/webm;codecs=vp8,opus',
+      'video/webm;codecs=vp9,opus',
+      'video/webm',
+    ].find(t => MediaRecorder.isTypeSupported(t)) || '';
+    const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
     mediaRecorderRef.current = recorder;
     streamRef.current = stream;
     chunksRef.current = [];

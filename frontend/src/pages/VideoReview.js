@@ -14,6 +14,7 @@ export default function VideoReview() {
   const [comments, setComments] = useState([]);
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [videoSrc, setVideoSrc] = useState('');
+  const [videoId, setVideoId] = useState('');
   const [videoLoading, setVideoLoading] = useState(true);
   const [videoError, setVideoError] = useState('');
 
@@ -58,8 +59,14 @@ export default function VideoReview() {
     setVideoLoading(true);
     setVideoError('');
     api.get(`/upload/sessions/${sessionId}/candidates/${encodeURIComponent(selectedCandidateId)}/latest-video`)
-      .then(({ data }) => setVideoSrc(data.playback_url || ''))
-      .catch(() => setVideoError('No reviewable video found for this candidate yet.'))
+      .then(({ data }) => {
+        setVideoSrc(data.playback_url || '');
+        setVideoId(data.job_id || '');
+      })
+      .catch(() => {
+        setVideoError('No reviewable video found for this candidate yet.');
+        setVideoId('');
+      })
       .finally(() => setVideoLoading(false));
   }, [sessionId, selectedCandidateId]);
 
@@ -101,7 +108,7 @@ export default function VideoReview() {
                 )}
               </div>
               <div className="card">
-                <TranscriptViewer sessionId={sessionId} currentTimeMs={currentTimeMs} />
+                <TranscriptViewer videoId={videoId} currentTimeMs={currentTimeMs} />
               </div>
             </div>
             <div className="card" style={{ position: 'sticky', top: '72px' }}>
