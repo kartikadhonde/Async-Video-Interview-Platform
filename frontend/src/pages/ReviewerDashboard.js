@@ -8,11 +8,17 @@ const STATUS_BADGE = { OPEN: 'badge-green', CLOSED: 'badge-gray', REVIEWING: 'ba
 export default function ReviewerDashboard() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/scheduling/sessions')
       .then(({ data }) => setSessions(data))
+      .catch((err) => {
+        const status = err?.response?.status;
+        setError(status ? `Failed to load sessions (HTTP ${status}).` : 'Failed to load sessions.');
+        setSessions([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -22,6 +28,8 @@ export default function ReviewerDashboard() {
       <div className="page">
         <div className="container">
           <h1 className="mb-md">Reviewer Dashboard</h1>
+
+          {error && <div className="alert alert-error">{error}</div>}
 
           {loading ? <div className="spinner" /> : (
             <div className="grid-2">

@@ -22,9 +22,16 @@ export default function TranscriptViewer({ videoId, currentTimeMs }) {
           setStatus('ready');
           clearInterval(pollRef.current);
         })
-        .catch(() => {
-          // Not ready yet — keep polling
-          setStatus('pending');
+        .catch((err) => {
+          if (err?.response?.status === 404) {
+            // Not ready yet — keep polling
+            setStatus('pending');
+            return;
+          }
+
+          // A non-404 error usually means service/auth/network failure.
+          setStatus('error');
+          clearInterval(pollRef.current);
         });
     }
 

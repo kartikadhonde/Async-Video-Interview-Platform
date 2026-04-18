@@ -3,15 +3,19 @@ import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
 import VideoPlayer from '../components/VideoPlayer';
+import TranscriptViewer from '../components/TranscriptViewer';
 import { formatTimestamp } from '../utils/formatTimestamp';
 
 export default function AnalyticsDashboard() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session');
   const [metrics, setMetrics] = useState([]);
+  const [error, setError] = useState('');
   const [candidateVideos, setCandidateVideos] = useState([]);
   const [selectedCandidateId, setSelectedCandidateId] = useState('');
   const [videoSrc, setVideoSrc] = useState('');
+  const [videoId, setVideoId] = useState('');
+  const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState('');
   const [comments, setComments] = useState([]);
@@ -20,8 +24,14 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     if (!sessionId) return;
     setLoading(true);
+    setError('');
     api.get(`/analytics/sessions/${sessionId}/candidates`)
       .then(({ data }) => setMetrics(data))
+      .catch((err) => {
+        const status = err?.response?.status;
+        setError(status ? `Failed to load analytics (HTTP ${status}).` : 'Failed to load analytics.');
+        setMetrics([]);
+      })
       .finally(() => setLoading(false));
   }, [sessionId]);
 
@@ -42,7 +52,9 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     if (!sessionId || !selectedCandidateId) {
       setVideoSrc('');
+      setVideoId('');
       setVideoError('');
+      setCurrentTimeMs(0);
       setComments([]);
       return;
     }
@@ -50,9 +62,13 @@ export default function AnalyticsDashboard() {
     setVideoLoading(true);
     setVideoError('');
     api.get(`/upload/sessions/${sessionId}/candidates/${encodeURIComponent(selectedCandidateId)}/latest-video`)
-      .then(({ data }) => setVideoSrc(data.playback_url || ''))
+      .then(({ data }) => {
+        setVideoSrc(data.playback_url || '');
+        setVideoId(data.job_id || '');
+      })
       .catch(() => {
         setVideoSrc('');
+        setVideoId('');
         setVideoError('No video available for this candidate yet.');
       })
       .finally(() => setVideoLoading(false));
@@ -74,6 +90,8 @@ export default function AnalyticsDashboard() {
           {!sessionId && (
             <div className="alert alert-info">Pass <code>?session=SESSION_ID</code> in the URL to view analytics.</div>
           )}
+
+          {error && <div className="alert alert-error">{error}</div>}
 
           {sessionId && (
             <div className="card" style={{ marginBottom: '1rem' }}>
@@ -102,7 +120,9 @@ export default function AnalyticsDashboard() {
                     <h3 style={{ marginBottom: '.75rem' }}>Interview Video</h3>
                     {videoLoading && <div className="spinner" />}
                     {!videoLoading && videoError && <p className="text-muted text-sm">{videoError}</p>}
-                    {!videoLoading && !videoError && videoSrc && <VideoPlayer src={videoSrc} />}
+                    {!videoLoading && !videoError && videoSrc && (
+                      <VideoPlayer src={videoSrc} onTimeUpdate={setCurrentTimeMs} />
+                    )}
                   </div>
 
                   <div className="card">
@@ -121,6 +141,12 @@ export default function AnalyticsDashboard() {
                       ))}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {sessionId && selectedCandidateId && (
+                <div className="card" style={{ marginBottom: '1rem' }}>
+                  <TranscriptViewer videoId={videoId} currentTimeMs={currentTimeMs} />
                 </div>
               )}
 

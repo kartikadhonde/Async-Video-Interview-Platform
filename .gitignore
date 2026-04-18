@@ -1,14 +1,33 @@
+# Dependencies
 node_modules/
+**/node_modules/
+
+# Environment files (keep only .env.example in repo)
 .env
 **/.env
+*.env.local
+
+# Python virtual environments
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Python caches/artifacts
 __pycache__/
 *.pyc
-venv/
-*.log
-.DS_Store
+*.pyo
+.pytest_cache/
+
+# Build artifacts
 dist/
 build/
-*.env.local
+
+# Logs
+*.log
+
+# OS/editor
+.DS_Store
 .idea/
 .vscode/settings.json
 .claude
