@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { useMediaRecorder } from '../hooks/useMediaRecorder';
 
-export default function VideoRecorder({ sessionId, candidateId, onComplete }) {
+export default function VideoRecorder({ sessionId, candidateId, candidateName, onComplete }) {
   const videoRef = useRef(null);
-  const { recording, startRecording, stopRecording } = useMediaRecorder(sessionId, candidateId);
+  const { recording, startRecording, stopRecording } = useMediaRecorder(sessionId, candidateId, candidateName);
   const [stopping, setStopping] = useState(false);
   const [error, setError] = useState('');
 

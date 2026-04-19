@@ -235,6 +235,13 @@ Useful URLs:
 - RabbitMQ UI: http://localhost:15672
 - MinIO Console: http://localhost:9001
 
+Role routes:
+
+- Candidate login: http://localhost:3007/login
+- Admin login (HR + reviewer): http://localhost:3007/admin/login
+- Reviewer dashboard: http://localhost:3007/reviewer
+- HR dashboard: http://localhost:3007/hr
+
 ---
 
 ## 9) Token + Transcript Tools
@@ -252,7 +259,31 @@ Candidate login now supports invite token based access.
 
 ---
 
-## 10) Common Issues and Fixes
+## 10) Reviewer Rating + HR Ranking
+
+Reviewer flow:
+
+1. Login from `/admin/login` with reviewer account
+2. Open reviewer dashboard and select a session
+3. In video review, add comments at timestamps and submit 5 metric ratings:
+  - Communication
+  - Technical depth
+  - Problem solving
+  - Confidence
+  - Culture fit
+
+HR flow:
+
+1. Login from `/admin/login` with HR account
+2. Open `/hr`
+3. Use tabs:
+  - Overview: KPIs + metric bars + score distribution
+  - Candidate Rankings: top candidates + ranked table
+  - Session Insights: per-session average score and status
+
+---
+
+## 11) Common Issues and Fixes
 
 ### A) Failed to load sessions (HTTP 504)
 
@@ -284,7 +315,7 @@ Upload records may appear in collection named uploadjobs (mongoose default plura
 
 ---
 
-## 11) Port Map
+## 12) Port Map
 
 - 3000: Gateway
 - 3001: Upload Service
@@ -301,7 +332,7 @@ Upload records may appear in collection named uploadjobs (mongoose default plura
 
 ---
 
-## 12) Team Tip
+## 13) Team Tip
 
 When pulling latest changes:
 

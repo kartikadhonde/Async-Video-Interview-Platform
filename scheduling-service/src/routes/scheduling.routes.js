@@ -6,6 +6,7 @@ const schedulingController = require('../controllers/scheduling.controller');
 router.post('/sessions', schedulingController.createSession);
 router.get('/sessions', schedulingController.listSessions);
 router.get('/sessions/:sessionId', schedulingController.getSession);
+router.get('/sessions/:sessionId/assignments', schedulingController.listAssignmentsBySession);
 
 // Question sets
 router.post('/question-sets', schedulingController.createQuestionSet);

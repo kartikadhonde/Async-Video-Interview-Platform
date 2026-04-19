@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import VideoPlayer from '../components/VideoPlayer';
 import CommentPanel from '../components/CommentPanel';
+import ReviewerRatingPanel from '../components/ReviewerRatingPanel';
 import TranscriptViewer from '../components/TranscriptViewer';
 import { useSocket } from '../hooks/useSocket';
 import api from '../services/api';
@@ -75,9 +76,13 @@ export default function VideoReview() {
       <Navbar />
       <div className="page">
         <div className="container">
-          <h1 className="mb-md">Video Review</h1>
+          <div className="hero-banner mb-md">
+            <p className="hero-kicker">Review Room</p>
+            <h1 style={{ marginBottom: '.3rem' }}>Video Review</h1>
+            <p style={{ marginBottom: 0 }}>Select a candidate and place comments at exact timestamps.</p>
+          </div>
 
-          <div className="card" style={{ marginBottom: '1rem' }}>
+          <div className="card card-elevated" style={{ marginBottom: '1rem' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Candidate submission</label>
               <select
@@ -91,7 +96,7 @@ export default function VideoReview() {
                 )}
                 {candidateVideos.map((c) => (
                   <option key={c.candidate_id} value={c.candidate_id}>
-                    {c.candidate_id}
+                    {c.candidate_name || c.candidate_id}
                   </option>
                 ))}
               </select>
@@ -111,17 +116,25 @@ export default function VideoReview() {
                 <TranscriptViewer videoId={videoId} currentTimeMs={currentTimeMs} />
               </div>
             </div>
-            <div className="card" style={{ position: 'sticky', top: '72px' }}>
-              <CommentPanel
-                comments={comments}
-                sessionId={sessionId}
-                candidateId={selectedCandidateId}
-                currentTimeMs={currentTimeMs}
-                onNewComment={(c) => {
-                  setComments(prev => [...prev, c]);
-                  emitComment(c);
-                }}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', position: 'sticky', top: '72px' }}>
+              <div className="card">
+                <ReviewerRatingPanel
+                  sessionId={sessionId}
+                  candidateId={selectedCandidateId}
+                />
+              </div>
+              <div className="card">
+                <CommentPanel
+                  comments={comments}
+                  sessionId={sessionId}
+                  candidateId={selectedCandidateId}
+                  currentTimeMs={currentTimeMs}
+                  onNewComment={(c) => {
+                    setComments(prev => [...prev, c]);
+                    emitComment(c);
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
