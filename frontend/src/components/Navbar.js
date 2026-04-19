@@ -5,17 +5,21 @@ import { useAuth } from '../hooks/useAuth';
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const homePath = user?.role === 'reviewer' ? '/reviewer' : '/hr';
 
   function handleLogout() {
     logout();
-    navigate('/login');
+    navigate('/admin/login');
   }
 
   return (
     <nav className="navbar">
-      <a className="navbar-brand" href="/">Interview Platform</a>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '.55rem' }}>
+        <button className="btn btn-outline btn-sm" type="button" onClick={() => navigate(-1)}>Back</button>
+        <button className="navbar-brand" onClick={() => navigate(homePath)}>Interview Platform</button>
+      </div>
       <div className="navbar-right">
-        {user && <span className="navbar-user">{user.email} · <strong>{user.role}</strong></span>}
+        {user && <span className="navbar-user">{user.name || user.email} · <strong>{user.role}</strong></span>}
         {user && <button className="btn btn-outline btn-sm" onClick={handleLogout}>Logout</button>}
       </div>
     </nav>

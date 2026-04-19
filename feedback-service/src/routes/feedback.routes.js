@@ -8,6 +8,12 @@ router.post('/comments', feedbackController.postComment);
 // GET /feedback/comments/:sessionId — get all comments for a session
 router.get('/comments/:sessionId', feedbackController.getComments);
 
+// POST /feedback/ratings — upsert reviewer rating for a candidate
+router.post('/ratings', feedbackController.upsertRating);
+
+// GET /feedback/ratings/:sessionId — list ratings for a session (optional query: candidate_id, reviewer_id)
+router.get('/ratings/:sessionId', feedbackController.getRatings);
+
 // POST /feedback/sessions/:sessionId/complete — mark review as done
 router.post('/sessions/:sessionId/complete', feedbackController.completeReview);
 

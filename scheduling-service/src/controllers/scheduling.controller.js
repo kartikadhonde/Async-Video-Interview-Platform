@@ -52,15 +52,26 @@ async function getQuestionSet(req, res) {
 
 async function createAssignment(req, res) {
   try {
-    const { session_id, candidate_id } = req.body;
+    const { session_id, candidate_id, candidate_profile } = req.body;
     const assignment = await Assignment.create({
       session_id,
       candidate_id,
+      candidate_profile,
       invite_token: uuidv4(),
     });
     res.status(201).json(assignment);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create assignment' });
+  }
+}
+
+async function listAssignmentsBySession(req, res) {
+  try {
+    const { sessionId } = req.params;
+    const assignments = await Assignment.find({ session_id: sessionId }).sort({ _id: -1 });
+    res.json(assignments);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to list assignments' });
   }
 }
 
@@ -77,5 +88,5 @@ async function getAssignmentByToken(req, res) {
 module.exports = {
   createSession, listSessions, getSession,
   createQuestionSet, getQuestionSet,
-  createAssignment, getAssignmentByToken,
+  createAssignment, getAssignmentByToken, listAssignmentsBySession,
 };

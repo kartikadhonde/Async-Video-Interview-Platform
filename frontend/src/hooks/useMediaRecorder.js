@@ -4,7 +4,7 @@ import { uploadChunk } from '../services/upload.service';
 /**
  * Hook wrapping the browser MediaRecorder API with chunked upload.
  */
-export function useMediaRecorder(sessionId, candidateId) {
+export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
   const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
   const chunksRef = useRef([]);
@@ -53,7 +53,7 @@ export function useMediaRecorder(sessionId, candidateId) {
       recorder.onstop = async () => {
         const finalBlob = new Blob(chunksRef.current, { type: 'video/webm' });
         if (finalBlob.size > 0) {
-          await uploadChunk(finalBlob, sessionId, candidateId, true);
+          await uploadChunk(finalBlob, sessionId, candidateId, true, candidateName);
         }
 
         if (streamRef.current) {

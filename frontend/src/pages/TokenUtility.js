@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import PublicTopBar from '../components/PublicTopBar';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 const SCHEDULING_DIRECT_BASE = process.env.REACT_APP_SCHEDULING_URL || 'http://localhost:3004';
 const TRANSCRIPTION_DIRECT_BASE = process.env.REACT_APP_TRANSCRIPTION_URL || 'http://localhost:3002';
 
@@ -15,7 +14,6 @@ function isNetworkError(err) {
 }
 
 export default function TokenUtility() {
-  const client = useMemo(() => axios.create({ baseURL: API_BASE }), []);
   const schedulingClient = useMemo(() => axios.create({ baseURL: SCHEDULING_DIRECT_BASE }), []);
   const transcriptionClient = useMemo(() => axios.create({ baseURL: TRANSCRIPTION_DIRECT_BASE }), []);
 
@@ -118,12 +116,12 @@ export default function TokenUtility() {
   return (
     <div className="page" style={{ paddingTop: '1rem' }}>
       <div className="container" style={{ maxWidth: '1080px' }}>
+        <PublicTopBar />
         <div className="flex-between mb-md" style={{ alignItems: 'flex-end' }}>
           <div>
             <h1 style={{ marginBottom: '.25rem' }}>Invite + Transcript Tools</h1>
             <p style={{ marginBottom: 0 }}>Generate a universal invite token with one click, then check transcript status.</p>
           </div>
-          <Link className="btn btn-outline btn-sm" to="/login">Back to login</Link>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}

@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 async function uploadChunk(req, res) {
   try {
-    const { session_id, candidate_id, is_final } = req.body;
+    const { session_id, candidate_id, candidate_name, is_final } = req.body;
     const chunk = req.file;
 
     if (!chunk) return res.status(400).json({ error: 'No chunk provided' });
@@ -18,6 +18,7 @@ async function uploadChunk(req, res) {
     const job = await UploadJob.create({
       session_id,
       candidate_id,
+      candidate_name,
       minio_url: minioUrl,
       status: is_final === 'true' ? 'COMPLETE' : 'UPLOADING',
     });
@@ -92,6 +93,7 @@ async function getLatestSessionVideosByCandidate(req, res) {
       {
         $group: {
           _id: '$candidate_id',
+          candidate_name: { $first: '$candidate_name' },
           job_id: { $first: '$_id' },
           minio_url: { $first: '$minio_url' },
           created_at: { $first: '$created_at' },
@@ -108,6 +110,7 @@ async function getLatestSessionVideosByCandidate(req, res) {
       if (keyStartIndex < 0) {
         return {
           candidate_id: item._id,
+          candidate_name: item.candidate_name || item._id,
           job_id: item.job_id,
           created_at: item.created_at,
           playback_url: null,
@@ -119,6 +122,7 @@ async function getLatestSessionVideosByCandidate(req, res) {
 
       return {
         candidate_id: item._id,
+        candidate_name: item.candidate_name || item._id,
         job_id: item.job_id,
         created_at: item.created_at,
         playback_url: playbackUrl,
@@ -159,6 +163,7 @@ async function getLatestVideoByCandidate(req, res) {
     res.json({
       session_id: sessionId,
       candidate_id: candidateId,
+      candidate_name: latestCompleteJob.candidate_name || candidateId,
       job_id: latestCompleteJob._id,
       playback_url: playbackUrl,
       created_at: latestCompleteJob.created_at,

@@ -7,11 +7,14 @@ import api from './api';
  * @param {string} candidateId
  * @param {boolean} isFinal - true for the last chunk
  */
-export async function uploadChunk(chunk, sessionId, candidateId, isFinal = false) {
+export async function uploadChunk(chunk, sessionId, candidateId, isFinal = false, candidateName = '') {
   const formData = new FormData();
   formData.append('chunk', chunk, 'chunk.webm');
   formData.append('session_id', sessionId);
   formData.append('candidate_id', candidateId);
+  if (candidateName) {
+    formData.append('candidate_name', String(candidateName));
+  }
   formData.append('is_final', String(isFinal));
 
   const { data } = await api.post('/upload/video', formData, {

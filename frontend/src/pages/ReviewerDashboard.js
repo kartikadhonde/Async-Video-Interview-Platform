@@ -27,7 +27,11 @@ export default function ReviewerDashboard() {
       <Navbar />
       <div className="page">
         <div className="container">
-          <h1 className="mb-md">Reviewer Dashboard</h1>
+          <div className="hero-banner mb-md">
+            <p className="hero-kicker">Reviewer Workspace</p>
+            <h1 style={{ marginBottom: '.3rem' }}>Reviewer Dashboard</h1>
+            <p style={{ marginBottom: 0 }}>Pick a session and leave precise timestamped feedback.</p>
+          </div>
 
           {error && <div className="alert alert-error">{error}</div>}
 
@@ -37,15 +41,15 @@ export default function ReviewerDashboard() {
                 <p className="text-muted">No sessions assigned to you yet.</p>
               )}
               {sessions.map(s => (
-                <div className="card" key={s._id}>
+                <div className="card card-elevated" key={s._id}>
                   <div className="flex-between" style={{ marginBottom: '.75rem' }}>
                     <span className={`badge ${STATUS_BADGE[s.status] || 'badge-gray'}`}>{s.status}</span>
                     {s.deadline && <span className="text-muted text-sm">{new Date(s.deadline).toLocaleDateString()}</span>}
                   </div>
                   <h3 style={{ marginBottom: '.5rem' }}>{s.title}</h3>
-                  <p className="text-sm" style={{ marginBottom: '1rem' }}>Session ID: {s._id}</p>
+                  <p className="text-sm" style={{ marginBottom: '1rem' }}>Session ID: {s._id.slice(0, 8)}...</p>
                   <button className="btn btn-primary btn-sm" onClick={() => navigate(`/review/${s._id}`)}>
-                    Review
+                    Open review room
                   </button>
                 </div>
               ))}

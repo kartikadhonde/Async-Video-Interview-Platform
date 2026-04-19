@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import VideoRecorder from '../components/VideoRecorder';
 import api from '../services/api';
+import PublicTopBar from '../components/PublicTopBar';
 
 export default function CandidateInterview() {
   const { token } = useParams();
@@ -65,15 +66,19 @@ export default function CandidateInterview() {
   }
 
   const question = questions[currentQuestion];
+  const candidateName = assignment?.candidate_profile?.full_name || assignment?.candidate_id;
 
   return (
     <div className="page-center" style={{ alignItems: 'flex-start', paddingTop: '2rem' }}>
       <div className="container-sm" style={{ width: '100%' }}>
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <h1 style={{ fontSize: '1.4rem', color: 'var(--brand)' }}>Interview Platform</h1>
+        <PublicTopBar />
+        <div className="hero-banner" style={{ marginBottom: '1rem' }}>
+          <p className="hero-kicker">Interview in progress</p>
+          <h1 style={{ fontSize: '1.45rem', marginBottom: '.35rem' }}>Hi {candidateName}, good luck.</h1>
+          <p style={{ marginBottom: 0 }}>Keep your answers clear and concise. Recording starts only when you click the button.</p>
         </div>
 
-        <div className="card">
+        <div className="card card-elevated">
           <div className="flex-between" style={{ marginBottom: '1.25rem' }}>
             <span className="text-muted text-sm">
               Question {currentQuestion + 1} {questions.length > 0 && `of ${questions.length}`}
@@ -92,6 +97,7 @@ export default function CandidateInterview() {
           <VideoRecorder
             sessionId={assignment.session_id}
             candidateId={assignment.candidate_id}
+            candidateName={candidateName}
             onComplete={handleComplete}
           />
         </div>

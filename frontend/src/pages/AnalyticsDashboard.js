@@ -79,6 +79,7 @@ export default function AnalyticsDashboard() {
   }, [sessionId, selectedCandidateId]);
 
   const selectedMetric = metrics.find((m) => m.candidate_id === selectedCandidateId);
+  const selectedCandidate = candidateVideos.find((c) => c.candidate_id === selectedCandidateId);
 
   return (
     <>
@@ -105,7 +106,7 @@ export default function AnalyticsDashboard() {
                 >
                   {candidateVideos.length === 0 && <option value="">No candidate submissions yet</option>}
                   {candidateVideos.map((c) => (
-                    <option key={c.candidate_id} value={c.candidate_id}>{c.candidate_id}</option>
+                    <option key={c.candidate_id} value={c.candidate_id}>{c.candidate_name || c.candidate_id}</option>
                   ))}
                 </select>
               </div>
@@ -153,7 +154,7 @@ export default function AnalyticsDashboard() {
               {sessionId && selectedMetric && (
                 <div className="card" style={{ marginBottom: '1rem' }}>
                   <p className="text-muted text-sm" style={{ marginBottom: '.5rem' }}>Selected Candidate Analytics</p>
-                  <h3 style={{ marginBottom: '1rem', wordBreak: 'break-all' }}>{selectedMetric.candidate_id}</h3>
+                  <h3 style={{ marginBottom: '1rem', wordBreak: 'break-all' }}>{selectedCandidate?.candidate_name || selectedMetric.candidate_id}</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
                     <div className="flex-between text-sm">
                       <span className="text-muted">Filler words</span>

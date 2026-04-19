@@ -6,22 +6,43 @@ import api from '../services/api';
 export default function CommentPanel({ comments, sessionId, candidateId, currentTimeMs, onNewComment }) {
   const { user } = useAuth();
   const [text, setText] = useState('');
+  const [timestampInput, setTimestampInput] = useState('');
+  const [inputError, setInputError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  function parseTimestampToMs(raw) {
+    const value = String(raw || '').trim();
+    if (!value) return currentTimeMs;
+    const parts = value.split(':').map((part) => Number(part));
+    if (parts.length !== 2 || parts.some((num) => Number.isNaN(num) || num < 0)) return null;
+    const [minutes, seconds] = parts;
+    return (minutes * 60 + seconds) * 1000;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() || !candidateId) return;
+
+    const selectedTimestampMs = parseTimestampToMs(timestampInput);
+    if (selectedTimestampMs === null) {
+      setInputError('Timestamp must be in mm:ss format (example: 02:15).');
+      return;
+    }
+
+    setInputError('');
+
     setLoading(true);
     try {
       const { data } = await api.post('/feedback/comments', {
         session_id: sessionId,
         candidate_id: candidateId,
         reviewer_id: user?.id,
-        video_timestamp_ms: currentTimeMs,
+        video_timestamp_ms: selectedTimestampMs,
         text,
       });
       onNewComment(data);
       setText('');
+      setTimestampInput('');
     } finally {
       setLoading(false);
     }
@@ -47,8 +68,27 @@ export default function CommentPanel({ comments, sessionId, candidateId, current
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
         <label className="form-label">
-          Add comment at <span className="badge badge-blue">{formatTimestamp(currentTimeMs)}</span>
+          Add comment at <span className="badge badge-blue">{formatTimestamp(parseTimestampToMs(timestampInput) ?? currentTimeMs)}</span>
         </label>
+        <div style={{ display: 'flex', gap: '.5rem' }}>
+          <input
+            className="form-input"
+            value={timestampInput}
+            onChange={(e) => {
+              setTimestampInput(e.target.value);
+              setInputError('');
+            }}
+            placeholder="mm:ss (leave empty for current video time)"
+          />
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => setTimestampInput(formatTimestamp(currentTimeMs))}
+          >
+            Use current
+          </button>
+        </div>
+        {inputError && <p className="text-sm" style={{ color: 'var(--danger)', margin: 0 }}>{inputError}</p>}
         <textarea
           className="form-input"
           rows={3}
