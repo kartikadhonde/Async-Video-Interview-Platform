@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 
@@ -17,9 +17,17 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
+      const trimmedInviteToken = inviteToken.trim();
+
+      if (trimmedInviteToken) {
+        const { data } = await api.post('/auth/invite-login', { invite_token: trimmedInviteToken });
+        login(data.user, data.token);
+        navigate(`/interview/${trimmedInviteToken}`);
+        return;
+      }
+
       const normalizedEmail = email.trim().toLowerCase();
       const { data } = await api.post('/auth/login', { email: normalizedEmail, password });
-      const trimmedInviteToken = inviteToken.trim();
 
       if (data.user.role === 'candidate' && !trimmedInviteToken) {
         setError('Invite token is required for candidate login.');
@@ -81,16 +89,25 @@ export default function Login() {
               <input
                 className="form-input"
                 type="text"
-                placeholder="Paste candidate invite token"
+                placeholder="Paste invite token (candidate access)"
                 value={inviteToken}
                 onChange={e => setInviteToken(e.target.value)}
               />
+              <p className="text-muted text-sm" style={{ marginTop: '.35rem', marginBottom: 0 }}>
+                If invite token is provided, candidate login uses token directly.
+              </p>
             </div>
 
             <div className="mt-md">
               <button className="btn btn-primary btn-full" type="submit" disabled={loading}>
                 {loading ? 'Signing in…' : 'Sign in'}
               </button>
+            </div>
+
+            <div className="mt-md" style={{ textAlign: 'center' }}>
+              <Link className="btn btn-outline btn-sm" to="/tools/tokens">
+                Open token + transcript tools
+              </Link>
             </div>
           </form>
         </div>

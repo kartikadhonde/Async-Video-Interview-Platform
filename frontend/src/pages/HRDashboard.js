@@ -8,11 +8,17 @@ const STATUS_BADGE = { OPEN: 'badge-green', CLOSED: 'badge-gray', REVIEWING: 'ba
 export default function HRDashboard() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/scheduling/sessions')
       .then(({ data }) => setSessions(data))
+      .catch((err) => {
+        const status = err?.response?.status;
+        setError(status ? `Failed to load sessions (HTTP ${status}).` : 'Failed to load sessions.');
+        setSessions([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -25,6 +31,8 @@ export default function HRDashboard() {
             <h1>HR Dashboard</h1>
             <button className="btn btn-primary btn-sm">+ New Session</button>
           </div>
+
+          {error && <div className="alert alert-error">{error}</div>}
 
           <div className="card">
             <p className="text-muted" style={{ marginBottom: '1rem' }}>All interview sessions</p>
