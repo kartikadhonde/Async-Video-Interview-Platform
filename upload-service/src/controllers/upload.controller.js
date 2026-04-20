@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 async function uploadChunk(req, res) {
   try {
-    const { session_id, candidate_id, candidate_name, question_boundaries, is_final } = req.body;
+    const { session_id, candidate_id, candidate_name, is_final } = req.body;
     const chunk = req.file;
 
     if (!chunk) return res.status(400).json({ error: 'No chunk provided' });
@@ -15,23 +15,10 @@ async function uploadChunk(req, res) {
 
     const minioUrl = await minioService.uploadFile(key, chunk.buffer, chunk.mimetype);
 
-    let parsedQuestionBoundaries = [];
-    if (question_boundaries) {
-      try {
-        const parsed = typeof question_boundaries === 'string' ? JSON.parse(question_boundaries) : question_boundaries;
-        if (Array.isArray(parsed)) {
-          parsedQuestionBoundaries = parsed;
-        }
-      } catch {
-        parsedQuestionBoundaries = [];
-      }
-    }
-
     const job = await UploadJob.create({
       session_id,
       candidate_id,
       candidate_name,
-      question_boundaries: parsedQuestionBoundaries,
       minio_url: minioUrl,
       status: is_final === 'true' ? 'COMPLETE' : 'UPLOADING',
     });
@@ -42,7 +29,6 @@ async function uploadChunk(req, res) {
         sessionId: session_id,
         candidateId: candidate_id,
         minioUrl,
-        questionBoundaries: parsedQuestionBoundaries,
       });
     }
 
