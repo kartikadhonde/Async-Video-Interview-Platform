@@ -42,7 +42,7 @@ export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
     setRecording(true);
   }
 
-  async function stopRecording() {
+  async function stopRecording(uploadMeta = {}) {
     return new Promise((resolve) => {
       const recorder = mediaRecorderRef.current;
       if (!recorder) {
@@ -53,7 +53,14 @@ export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
       recorder.onstop = async () => {
         const finalBlob = new Blob(chunksRef.current, { type: 'video/webm' });
         if (finalBlob.size > 0) {
-          await uploadChunk(finalBlob, sessionId, candidateId, true, candidateName);
+          await uploadChunk(
+            finalBlob,
+            sessionId,
+            candidateId,
+            true,
+            candidateName,
+            uploadMeta.questionBoundaries || []
+          );
         }
 
         if (streamRef.current) {

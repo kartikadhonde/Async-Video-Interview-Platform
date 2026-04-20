@@ -24,16 +24,14 @@ export default function HRDashboard() {
         const { data: sessions } = await api.get('/scheduling/sessions');
         const sessionPayloads = await Promise.all(
           sessions.map(async (session) => {
-            const [assignmentsRes, analyticsRes, ratingsRes] = await Promise.all([
+            const [assignmentsRes, ratingsRes] = await Promise.all([
               api.get(`/scheduling/sessions/${session._id}/assignments`).catch(() => ({ data: [] })),
-              api.get(`/analytics/sessions/${session._id}/candidates`).catch(() => ({ data: [] })),
               api.get(`/feedback/ratings/${session._id}`).catch(() => ({ data: [] })),
             ]);
 
             return {
               session,
               assignments: assignmentsRes.data || [],
-              analytics: analyticsRes.data || [],
               ratings: ratingsRes.data || [],
             };
           })
@@ -41,22 +39,16 @@ export default function HRDashboard() {
 
         const rows = [];
 
-        sessionPayloads.forEach(({ session, assignments, analytics, ratings }) => {
+        sessionPayloads.forEach(({ session, assignments, ratings }) => {
           const ratingsByCandidate = ratings.reduce((acc, rating) => {
             if (!acc[rating.candidate_id]) acc[rating.candidate_id] = [];
             acc[rating.candidate_id].push(rating);
             return acc;
           }, {});
 
-          const analyticsByCandidate = analytics.reduce((acc, metric) => {
-            acc[metric.candidate_id] = metric;
-            return acc;
-          }, {});
-
           assignments.forEach((assignment) => {
             const candidateId = assignment.candidate_id;
             const candidateRatings = ratingsByCandidate[candidateId] || [];
-            const candidateAnalytics = analyticsByCandidate[candidateId] || {};
 
             const communication = average(candidateRatings.map((item) => item.communication_score));
             const technical = average(candidateRatings.map((item) => item.technical_score));
@@ -78,9 +70,6 @@ export default function HRDashboard() {
               confidence,
               cultureFit,
               reviewerOverall,
-              fillerWords: candidateAnalytics.filler_word_count ?? 0,
-              talkTime: candidateAnalytics.talk_time_seconds ?? 0,
-              sentiment: candidateAnalytics.sentiment_score ?? 0,
             });
           });
         });
@@ -277,8 +266,6 @@ export default function HRDashboard() {
                           <th>Rank</th>
                           <th>Candidate</th>
                           <th>Reviewer Avg</th>
-                          <th>Talk Time</th>
-                          <th>Sentiment</th>
                           <th>Session</th>
                           <th></th>
                         </tr>
@@ -292,8 +279,6 @@ export default function HRDashboard() {
                               <p className="text-muted text-sm" style={{ margin: 0 }}>{row.candidateEmail}</p>
                             </td>
                             <td><strong>{row.reviewerOverall.toFixed(1)}</strong></td>
-                            <td>{row.talkTime}s</td>
-                            <td>{Number(row.sentiment || 0).toFixed(2)}</td>
                             <td><span className={`badge ${STATUS_BADGE[row.sessionStatus] || 'badge-gray'}`}>{row.sessionStatus}</span></td>
                             <td>
                               <button

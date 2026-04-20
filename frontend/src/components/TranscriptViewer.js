@@ -42,6 +42,93 @@ export default function TranscriptViewer({ videoId, currentTimeMs }) {
     return () => clearInterval(pollRef.current);
   }, [videoId]);
 
+  function renderSplitByQuestions() {
+    if (!transcript || !Array.isArray(transcript.segments) || transcript.segments.length === 0) {
+      return <p className="text-muted text-sm">No speech detected.</p>;
+    }
+
+    const boundaries = Array.isArray(transcript.question_boundaries) ? transcript.question_boundaries : [];
+
+    if (!boundaries.length) {
+      return (
+        <p style={{ lineHeight: 1.9, fontSize: '.9rem' }}>
+          {transcript.segments.map((seg, i) => {
+            const active = currentTimeMs >= seg.start_ms && currentTimeMs < seg.end_ms;
+            return (
+              <span
+                key={i}
+                style={{
+                  backgroundColor: active ? '#fef08a' : 'transparent',
+                  borderRadius: '3px',
+                  padding: '1px 2px',
+                  transition: 'background-color .15s',
+                  fontWeight: active ? 600 : 400,
+                }}
+              >
+                {seg.text}{' '}
+              </span>
+            );
+          })}
+        </p>
+      );
+    }
+
+    const normalized = boundaries
+      .map((b, idx) => ({
+        idx,
+        questionText: b.question_text || `Question ${idx + 1}`,
+        startMs: Number(b.started_at_ms ?? idx * 60000) || 0,
+        endMs: Number.isFinite(Number(b.ended_at_ms)) ? Number(b.ended_at_ms) : null,
+      }))
+      .sort((a, b) => a.startMs - b.startMs)
+      .map((b, idx, arr) => ({
+        ...b,
+        endMs: b.endMs != null ? b.endMs : (arr[idx + 1]?.startMs ?? Number.MAX_SAFE_INTEGER),
+      }));
+
+    const grouped = normalized.map((q) => {
+      const matched = transcript.segments.filter((seg) => {
+        const midpoint = (Number(seg.start_ms || 0) + Number(seg.end_ms || 0)) / 2;
+        return midpoint >= q.startMs && midpoint < q.endMs;
+      });
+
+      return { ...q, segments: matched };
+    });
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '.9rem' }}>
+        {grouped.map((q, i) => (
+          <div key={`${q.idx}-${q.startMs}`} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '.75rem' }}>
+            <p style={{ margin: 0, marginBottom: '.5rem', fontWeight: 700 }}>Q{i + 1}. {q.questionText}</p>
+            {q.segments.length ? (
+              <p style={{ margin: 0, lineHeight: 1.8, fontSize: '.9rem' }}>
+                {q.segments.map((seg, idx) => {
+                  const active = currentTimeMs >= seg.start_ms && currentTimeMs < seg.end_ms;
+                  return (
+                    <span
+                      key={`${q.idx}-seg-${idx}`}
+                      style={{
+                        backgroundColor: active ? '#fef08a' : 'transparent',
+                        borderRadius: '3px',
+                        padding: '1px 2px',
+                        fontWeight: active ? 600 : 400,
+                        transition: 'background-color .15s',
+                      }}
+                    >
+                      {seg.text}{' '}
+                    </span>
+                  );
+                })}
+              </p>
+            ) : (
+              <p className="text-muted text-sm" style={{ margin: 0 }}>No spoken content captured for this answer.</p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex-between" style={{ marginBottom: '.75rem' }}>
@@ -64,31 +151,7 @@ export default function TranscriptViewer({ videoId, currentTimeMs }) {
       )}
 
       {status === 'ready' && transcript && (
-        <>
-          {transcript.segments?.length > 0 ? (
-            <p style={{ lineHeight: 1.9, fontSize: '.9rem' }}>
-              {transcript.segments.map((seg, i) => {
-                const active = currentTimeMs >= seg.start_ms && currentTimeMs < seg.end_ms;
-                return (
-                  <span
-                    key={i}
-                    style={{
-                      backgroundColor: active ? '#fef08a' : 'transparent',
-                      borderRadius: '3px',
-                      padding: '1px 2px',
-                      transition: 'background-color .15s',
-                      fontWeight: active ? 600 : 400,
-                    }}
-                  >
-                    {seg.text}{' '}
-                  </span>
-                );
-              })}
-            </p>
-          ) : (
-            <p className="text-muted text-sm">{transcript.full_text || 'No speech detected.'}</p>
-          )}
-        </>
+        <>{renderSplitByQuestions()}</>
       )}
 
       {status === 'error' && (

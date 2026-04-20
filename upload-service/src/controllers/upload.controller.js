@@ -7,6 +7,18 @@ async function uploadChunk(req, res) {
   try {
     const { session_id, candidate_id, candidate_name, is_final } = req.body;
     const chunk = req.file;
+    let questionBoundaries = [];
+
+    if (req.body.question_boundaries) {
+      try {
+        const parsed = JSON.parse(req.body.question_boundaries);
+        if (Array.isArray(parsed)) {
+          questionBoundaries = parsed;
+        }
+      } catch (err) {
+        console.warn('Invalid question_boundaries payload. Ignoring.');
+      }
+    }
 
     if (!chunk) return res.status(400).json({ error: 'No chunk provided' });
 
@@ -19,6 +31,7 @@ async function uploadChunk(req, res) {
       session_id,
       candidate_id,
       candidate_name,
+      question_boundaries: questionBoundaries,
       minio_url: minioUrl,
       status: is_final === 'true' ? 'COMPLETE' : 'UPLOADING',
     });
@@ -29,6 +42,7 @@ async function uploadChunk(req, res) {
         sessionId: session_id,
         candidateId: candidate_id,
         minioUrl,
+        questionBoundaries,
       });
     }
 

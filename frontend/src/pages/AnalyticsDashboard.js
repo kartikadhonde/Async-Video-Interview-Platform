@@ -9,7 +9,6 @@ import { formatTimestamp } from '../utils/formatTimestamp';
 export default function AnalyticsDashboard() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session');
-  const [metrics, setMetrics] = useState([]);
   const [error, setError] = useState('');
   const [candidateVideos, setCandidateVideos] = useState([]);
   const [selectedCandidateId, setSelectedCandidateId] = useState('');
@@ -20,21 +19,6 @@ export default function AnalyticsDashboard() {
   const [videoError, setVideoError] = useState('');
   const [comments, setComments] = useState([]);
   const [reviewerMap, setReviewerMap] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!sessionId) return;
-    setLoading(true);
-    setError('');
-    api.get(`/analytics/sessions/${sessionId}/candidates`)
-      .then(({ data }) => setMetrics(data))
-      .catch((err) => {
-        const status = err?.response?.status;
-        setError(status ? `Failed to load analytics (HTTP ${status}).` : 'Failed to load analytics.');
-        setMetrics([]);
-      })
-      .finally(() => setLoading(false));
-  }, [sessionId]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -111,7 +95,6 @@ export default function AnalyticsDashboard() {
     return map;
   }, [comments]);
 
-  const selectedMetric = metrics.find((m) => m.candidate_id === selectedCandidateId);
   const selectedCandidate = candidateVideos.find((c) => c.candidate_id === selectedCandidateId);
 
   return (
@@ -146,108 +129,83 @@ export default function AnalyticsDashboard() {
             </div>
           )}
 
-          {loading ? <div className="spinner" /> : (
-            <>
-              {sessionId && selectedCandidateId && (
-                <div className="grid-2" style={{ marginBottom: '1rem' }}>
-                  <div className="card" style={{ padding: '1rem' }}>
-                    <h3 style={{ marginBottom: '.75rem' }}>Interview Video</h3>
-                    {videoLoading && <div className="spinner" />}
-                    {!videoLoading && videoError && <p className="text-muted text-sm">{videoError}</p>}
-                    {!videoLoading && !videoError && videoSrc && (
-                      <VideoPlayer src={videoSrc} onTimeUpdate={setCurrentTimeMs} />
-                    )}
-                  </div>
+          <>
+            {sessionId && selectedCandidateId && (
+              <div className="grid-2" style={{ marginBottom: '1rem' }}>
+                <div className="card" style={{ padding: '1rem' }}>
+                  <h3 style={{ marginBottom: '.75rem' }}>Interview Video</h3>
+                  {videoLoading && <div className="spinner" />}
+                  {!videoLoading && videoError && <p className="text-muted text-sm">{videoError}</p>}
+                  {!videoLoading && !videoError && videoSrc && (
+                    <VideoPlayer src={videoSrc} onTimeUpdate={setCurrentTimeMs} />
+                  )}
+                </div>
 
-                  <div className="card">
-                    <h3>Reviewer Comments <span className="text-muted text-sm">({comments.length})</span></h3>
-                    <hr className="divider" />
-                    <div style={{ maxHeight: '320px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
-                      {comments.length === 0 && <p className="text-muted text-sm">No comments yet for this candidate.</p>}
-                      {[...comments].sort((a, b) => a.video_timestamp_ms - b.video_timestamp_ms).map(c => {
-                        const reviewer = reviewerMap[c.reviewer_id];
-                        const reviewerLabel = reviewerAliasMap[c.reviewer_id] || reviewer?.name || 'reviewer';
+                <div className="card">
+                  <h3>Reviewer Comments <span className="text-muted text-sm">({comments.length})</span></h3>
+                  <hr className="divider" />
+                  <div style={{ maxHeight: '320px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
+                    {comments.length === 0 && <p className="text-muted text-sm">No comments yet for this candidate.</p>}
+                    {[...comments].sort((a, b) => a.video_timestamp_ms - b.video_timestamp_ms).map(c => {
+                      const reviewer = reviewerMap[c.reviewer_id];
+                      const reviewerLabel = reviewerAliasMap[c.reviewer_id] || reviewer?.name || 'reviewer';
 
-                        return (
-                          <div key={c._id} style={{ padding: '.75rem', background: 'var(--bg)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                            <div className="flex-between" style={{ marginBottom: '.3rem' }}>
-                              <span className="badge badge-blue">{formatTimestamp(c.video_timestamp_ms)}</span>
-                              <span className="text-muted text-sm">{reviewerLabel}</span>
-                            </div>
-                            <p style={{ margin: 0, fontSize: '.875rem', color: 'var(--text)' }}>{c.text}</p>
+                      return (
+                        <div key={c._id} style={{ padding: '.75rem', background: 'var(--bg)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                          <div className="flex-between" style={{ marginBottom: '.3rem' }}>
+                            <span className="badge badge-blue">{formatTimestamp(c.video_timestamp_ms)}</span>
+                            <span className="text-muted text-sm">{reviewerLabel}</span>
                           </div>
-                        )
-                      })}
-                    </div>
+                          <p style={{ margin: 0, fontSize: '.875rem', color: 'var(--text)' }}>{c.text}</p>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {sessionId && selectedCandidateId && (
-                <div className="card" style={{ marginBottom: '1rem' }}>
-                  <TranscriptViewer videoId={videoId} currentTimeMs={currentTimeMs} />
-                </div>
-              )}
+            {sessionId && selectedCandidateId && (
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <TranscriptViewer videoId={videoId} currentTimeMs={currentTimeMs} />
+              </div>
+            )}
 
-              {sessionId && selectedMetric && (
-                <div className="card" style={{ marginBottom: '1rem' }}>
-                  <p className="text-muted text-sm" style={{ marginBottom: '.5rem' }}>Selected Candidate Analytics</p>
-                  <h3 style={{ marginBottom: '1rem', wordBreak: 'break-all' }}>{selectedCandidate?.candidate_name || selectedMetric.candidate_id}</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
-                    <div className="flex-between text-sm">
-                      <span className="text-muted">Filler words</span>
-                      <strong>{selectedMetric.filler_word_count}</strong>
-                    </div>
-                    <div className="flex-between text-sm">
-                      <span className="text-muted">Talk time</span>
-                      <strong>{selectedMetric.talk_time_seconds}s</strong>
-                    </div>
-                    <div className="flex-between text-sm">
-                      <span className="text-muted">Sentiment</span>
-                      <strong>{selectedMetric.sentiment_score ?? '—'}</strong>
-                    </div>
-                    <div className="flex-between text-sm">
-                      <span className="text-muted">Rank</span>
-                      <strong>{selectedMetric.overall_rank ?? '—'}</strong>
-                    </div>
+            {sessionId && selectedCandidateId && (
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <p className="text-muted text-sm" style={{ marginBottom: '.5rem' }}>Selected Candidate</p>
+                <h3 style={{ marginBottom: '.4rem', wordBreak: 'break-all' }}>{selectedCandidate?.candidate_name || selectedCandidateId}</h3>
+                <p className="text-muted text-sm" style={{ margin: 0 }}>
+                  Reviewer insights are shown through timestamp comments, transcript segments, and 5-metric ratings in review workflows.
+                </p>
+              </div>
+            )}
+
+            {sessionId && !selectedCandidateId && (
+              <p className="text-muted">No candidate submissions yet for this session.</p>
+            )}
+
+            {sessionId && selectedCandidateId && (
+              <div className="card" style={{ marginBottom: '1rem' }}>
+                <p className="text-muted text-sm" style={{ marginBottom: '.5rem' }}>Selected Candidate Context</p>
+                <h3 style={{ marginBottom: '1rem', wordBreak: 'break-all' }}>{selectedCandidate?.candidate_name || selectedCandidateId}</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+                  <div className="flex-between text-sm">
+                    <span className="text-muted">Candidate ID</span>
+                    <strong>{selectedCandidateId}</strong>
+                  </div>
+                  <div className="flex-between text-sm">
+                    <span className="text-muted">Video status</span>
+                    <strong>{videoId ? 'Available' : 'Pending'}</strong>
+                  </div>
+                  <div className="flex-between text-sm">
+                    <span className="text-muted">Comments</span>
+                    <strong>{comments.length}</strong>
                   </div>
                 </div>
-              )}
-
-              {metrics.length > 0 && (
-                <div className="grid-3">
-                  {metrics.map(m => (
-                    <div className="card" key={m._id}>
-                      <p className="text-muted text-sm" style={{ marginBottom: '.5rem' }}>Candidate</p>
-                      <h3 style={{ marginBottom: '1rem', wordBreak: 'break-all' }}>{m.candidate_id}</h3>
-                      <hr className="divider" />
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
-                        <div className="flex-between text-sm">
-                          <span className="text-muted">Filler words</span>
-                          <strong>{m.filler_word_count}</strong>
-                        </div>
-                        <div className="flex-between text-sm">
-                          <span className="text-muted">Talk time</span>
-                          <strong>{m.talk_time_seconds}s</strong>
-                        </div>
-                        <div className="flex-between text-sm">
-                          <span className="text-muted">Sentiment</span>
-                          <strong>{m.sentiment_score ?? '—'}</strong>
-                        </div>
-                        <div className="flex-between text-sm">
-                          <span className="text-muted">Rank</span>
-                          <strong>{m.overall_rank ?? '—'}</strong>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {sessionId && metrics.length === 0 && !loading && (
-                <p className="text-muted">No analytics data yet for this session.</p>
-              )}
-            </>
-          )}
+              </div>
+            )}
+          </>
         </div>
       </div>
     </>
