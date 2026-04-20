@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import VideoPlayer from '../components/VideoPlayer';
 import CommentPanel from '../components/CommentPanel';
@@ -10,8 +10,6 @@ import api from '../services/api';
 
 export default function VideoReview() {
   const { sessionId } = useParams();
-  const [searchParams] = useSearchParams();
-  const preferredCandidateId = searchParams.get('candidate') || '';
   const [candidateVideos, setCandidateVideos] = useState([]);
   const [selectedCandidateId, setSelectedCandidateId] = useState('');
   const [comments, setComments] = useState([]);
@@ -32,14 +30,13 @@ export default function VideoReview() {
       .then(({ data }) => {
         const candidates = data?.candidates || [];
         setCandidateVideos(candidates);
-        const preferredExists = candidates.some((c) => c.candidate_id === preferredCandidateId);
-        setSelectedCandidateId(preferredExists ? preferredCandidateId : (candidates[0]?.candidate_id || ''));
+        setSelectedCandidateId(candidates[0]?.candidate_id || '');
       })
       .catch(() => {
         setCandidateVideos([]);
         setSelectedCandidateId('');
       });
-  }, [sessionId, preferredCandidateId]);
+  }, [sessionId]);
 
   useEffect(() => {
     if (!selectedCandidateId) {
@@ -74,8 +71,6 @@ export default function VideoReview() {
       .finally(() => setVideoLoading(false));
   }, [sessionId, selectedCandidateId]);
 
-  const selectedCandidate = candidateVideos.find((c) => c.candidate_id === selectedCandidateId);
-
   return (
     <>
       <Navbar />
@@ -84,9 +79,28 @@ export default function VideoReview() {
           <div className="hero-banner mb-md">
             <p className="hero-kicker">Review Room</p>
             <h1 style={{ marginBottom: '.3rem' }}>Video Review</h1>
-            <p style={{ marginBottom: 0 }}>
-              Reviewing: <strong>{selectedCandidate?.candidate_name || selectedCandidateId || 'No candidate available'}</strong>
-            </p>
+            <p style={{ marginBottom: 0 }}>Select a candidate and place comments at exact timestamps.</p>
+          </div>
+
+          <div className="card card-elevated" style={{ marginBottom: '1rem' }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Candidate submission</label>
+              <select
+                className="form-input"
+                value={selectedCandidateId}
+                onChange={(e) => setSelectedCandidateId(e.target.value)}
+                disabled={candidateVideos.length === 0}
+              >
+                {candidateVideos.length === 0 && (
+                  <option value="">No candidate submissions yet</option>
+                )}
+                {candidateVideos.map((c) => (
+                  <option key={c.candidate_id} value={c.candidate_id}>
+                    {c.candidate_name || c.candidate_id}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '1.25rem', alignItems: 'start' }}>

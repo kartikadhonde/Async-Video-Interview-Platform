@@ -6,57 +6,20 @@ import api from '../services/api';
 const STATUS_BADGE = { OPEN: 'badge-green', CLOSED: 'badge-gray', REVIEWING: 'badge-blue' };
 
 export default function ReviewerDashboard() {
-  const [reviewCards, setReviewCards] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function loadReviewCards() {
-      try {
-        const { data: sessions } = await api.get('/scheduling/sessions');
-        const cards = [];
-
-        for (const session of sessions) {
-          const { data: assignments = [] } = await api.get(`/scheduling/sessions/${session._id}/assignments`).catch(() => ({ data: [] }));
-
-          if (!assignments.length) {
-            cards.push({
-              key: `pending-${session._id}`,
-              sessionId: session._id,
-              sessionStatus: session.status,
-              deadline: session.deadline,
-              sessionTitle: session.title,
-              candidateId: '',
-              candidateName: 'Pending candidate',
-            });
-            continue;
-          }
-
-          assignments.forEach((assignment) => {
-            cards.push({
-              key: `${session._id}-${assignment._id}`,
-              sessionId: session._id,
-              sessionStatus: session.status,
-              deadline: session.deadline,
-              sessionTitle: session.title,
-              candidateId: assignment.candidate_id,
-              candidateName: assignment?.candidate_profile?.full_name || assignment.candidate_id,
-            });
-          });
-        }
-
-        setReviewCards(cards);
-      } catch (err) {
+    api.get('/scheduling/sessions')
+      .then(({ data }) => setSessions(data))
+      .catch((err) => {
         const status = err?.response?.status;
         setError(status ? `Failed to load sessions (HTTP ${status}).` : 'Failed to load sessions.');
-        setReviewCards([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadReviewCards();
+        setSessions([]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -74,22 +37,18 @@ export default function ReviewerDashboard() {
 
           {loading ? <div className="spinner" /> : (
             <div className="grid-2">
-              {reviewCards.length === 0 && (
+              {sessions.length === 0 && (
                 <p className="text-muted">No sessions assigned to you yet.</p>
               )}
-              {reviewCards.map((card) => (
-                <div className="card card-elevated" key={card.key}>
+              {sessions.map(s => (
+                <div className="card card-elevated" key={s._id}>
                   <div className="flex-between" style={{ marginBottom: '.75rem' }}>
-                    <span className={`badge ${STATUS_BADGE[card.sessionStatus] || 'badge-gray'}`}>{card.sessionStatus}</span>
-                    {card.deadline && <span className="text-muted text-sm">{new Date(card.deadline).toLocaleDateString()}</span>}
+                    <span className={`badge ${STATUS_BADGE[s.status] || 'badge-gray'}`}>{s.status}</span>
+                    {s.deadline && <span className="text-muted text-sm">{new Date(s.deadline).toLocaleDateString()}</span>}
                   </div>
-                  <h3 style={{ marginBottom: '.35rem' }}>{card.candidateName}</h3>
-                  <p className="text-sm" style={{ marginBottom: '.35rem' }}>{card.sessionTitle}</p>
-                  <p className="text-sm" style={{ marginBottom: '1rem' }}>Session ID: {card.sessionId.slice(0, 8)}...</p>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => navigate(`/review/${card.sessionId}${card.candidateId ? `?candidate=${encodeURIComponent(card.candidateId)}` : ''}`)}
-                  >
+                  <h3 style={{ marginBottom: '.5rem' }}>{s.title}</h3>
+                  <p className="text-sm" style={{ marginBottom: '1rem' }}>Session ID: {s._id.slice(0, 8)}...</p>
+                  <button className="btn btn-primary btn-sm" onClick={() => navigate(`/review/${s._id}`)}>
                     Open review room
                   </button>
                 </div>

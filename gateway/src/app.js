@@ -6,7 +6,6 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { verifyToken } = require('./middleware/auth');
 
 const app = express();
-const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL || 'http://localhost:3008';
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -44,11 +43,6 @@ app.get('/scheduling/question-sets/:id', createProxyMiddleware({
   changeOrigin: true,
 }));
 
-app.get('/questions/fixed', createProxyMiddleware({
-  target: QUESTION_SERVICE_URL,
-  changeOrigin: true,
-}));
-
 // All routes below require a valid JWT
 app.use(verifyToken);
 
@@ -75,11 +69,6 @@ app.use('/scheduling', createProxyMiddleware({
 
 app.use('/analytics', createProxyMiddleware({
   target: process.env.ANALYTICS_SERVICE_URL,
-  changeOrigin: true,
-}));
-
-app.use('/questions', createProxyMiddleware({
-  target: QUESTION_SERVICE_URL,
   changeOrigin: true,
 }));
 

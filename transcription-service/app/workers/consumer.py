@@ -22,7 +22,6 @@ def handle_video_uploaded(ch, method, properties, body):
         session_id = payload["sessionId"]
         candidate_id = payload["candidateId"]
         minio_url = payload["minioUrl"]
-        question_boundaries = payload.get("questionBoundaries", [])
 
         db = get_db()
 
@@ -40,7 +39,6 @@ def handle_video_uploaded(ch, method, properties, body):
             "video_id": video_id,
             "session_id": session_id,
             "candidate_id": candidate_id,
-            "question_boundaries": question_boundaries,
             "full_text": result.get("text", ""),
             "language": result.get("language", "en"),
             "duration_seconds": 0,
