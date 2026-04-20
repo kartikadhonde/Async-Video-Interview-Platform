@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
+import InterviewToolsPanel from '../components/InterviewToolsPanel';
 
 const STATUS_BADGE = { OPEN: 'badge-green', CLOSED: 'badge-gray', REVIEWING: 'badge-blue' };
 
@@ -349,6 +350,14 @@ export default function HRDashboard() {
                 )}
               </>
             )}
+          </div>
+
+          <div className="card card-elevated mt-lg">
+            <InterviewToolsPanel
+              embedded
+              title="HR Tools"
+              description="Create universal candidate invites and verify transcript status directly from the HR dashboard."
+            />
           </div>
         </div>
       </div>

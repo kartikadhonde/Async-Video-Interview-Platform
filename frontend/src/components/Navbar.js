@@ -8,8 +8,9 @@ export default function Navbar() {
   const homePath = user?.role === 'reviewer' ? '/reviewer' : '/hr';
 
   function handleLogout() {
+    const nextPath = user?.role === 'reviewer' ? '/reviewer/login' : '/admin/login';
     logout();
-    navigate('/admin/login');
+    navigate(nextPath);
   }
 
   return (

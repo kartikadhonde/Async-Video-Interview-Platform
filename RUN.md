@@ -102,7 +102,6 @@ $services = @(
   "transcription-service",
   "feedback-service",
   "scheduling-service",
-  "notification-service",
   "analytics-service",
   "frontend"
 )
@@ -116,7 +115,6 @@ foreach ($s in $services) {
 Important:
 
 - Use the same JWT_SECRET in gateway and scheduling-service
-- Configure SMTP_USER and SMTP_PASS in notification-service if email sending is needed
 - FFmpeg path can be forced in transcription-service/.env with FFMPEG_PATH if required
 
 Example (optional) for transcription-service/.env:
@@ -191,7 +189,6 @@ cd gateway && npm start
 cd upload-service && npm start
 cd transcription-service && source .venv/bin/activate && python -m uvicorn main:app --host 0.0.0.0 --port 3002 --reload
 cd feedback-service && npm start
-cd notification-service && npm start
 cd analytics-service && npm start
 cd frontend && npm start
 ```
@@ -334,7 +331,6 @@ Upload records may appear in collection named uploadjobs (mongoose default plura
 - 3002: Transcription Service
 - 3003: Feedback Service
 - 3004: Scheduling Service
-- 3005: Notification Service
 - 3006: Analytics Service
 - 3007: Frontend
 - 3008: Question Service

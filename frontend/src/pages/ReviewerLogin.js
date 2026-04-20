@@ -4,10 +4,10 @@ import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import PublicTopBar from '../components/PublicTopBar';
 
-export default function AdminLogin() {
+export default function ReviewerLogin() {
     const { login } = useAuth();
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -18,24 +18,17 @@ export default function AdminLogin() {
         setLoading(true);
 
         try {
-            const normalizedEmail = email.trim().toLowerCase();
-            const { data } = await api.post('/auth/login', { email: normalizedEmail, password });
-
-            if (data?.user?.role === 'candidate') {
-                setError('Candidates must use the candidate portal with an invite token.');
-                setLoading(false);
-                return;
-            }
+            const normalizedUsername = username.trim().toLowerCase();
+            const { data } = await api.post('/auth/reviewer-login', {
+                username: normalizedUsername,
+                password,
+            });
 
             login(data.user, data.token);
-            if (data.user.role === 'reviewer') {
-                navigate('/reviewer');
-            } else {
-                navigate('/hr');
-            }
+            navigate('/reviewer');
         } catch (err) {
             const serverError = err?.response?.data?.error;
-            setError(serverError || 'Invalid admin credentials.');
+            setError(serverError || 'Invalid reviewer credentials.');
         } finally {
             setLoading(false);
         }
@@ -46,9 +39,9 @@ export default function AdminLogin() {
             <div className="container-sm" style={{ width: '100%' }}>
                 <PublicTopBar />
                 <div className="hero-banner" style={{ marginBottom: '1.5rem' }}>
-                    <p className="hero-kicker">Admin Portal</p>
-                    <h1 style={{ marginBottom: '.4rem' }}>HR Login</h1>
-                    <p style={{ margin: 0 }}>Sign in with your HR account. No invite token needed.</p>
+                    <p className="hero-kicker">Reviewer Portal</p>
+                    <h1 style={{ marginBottom: '.4rem' }}>Reviewer Login</h1>
+                    <p style={{ margin: 0 }}>Use username format reviewer1, reviewer2, etc. Password is review.</p>
                 </div>
 
                 <div className="card card-elevated">
@@ -56,13 +49,13 @@ export default function AdminLogin() {
                         {error && <div className="alert alert-error">{error}</div>}
 
                         <div className="form-group">
-                            <label className="form-label">Email address</label>
+                            <label className="form-label">Username</label>
                             <input
                                 className="form-input"
-                                type="email"
-                                placeholder="you@company.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                type="text"
+                                placeholder="reviewer1"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 required
                                 autoFocus
                             />
@@ -73,7 +66,7 @@ export default function AdminLogin() {
                             <input
                                 className="form-input"
                                 type="password"
-                                placeholder="Enter password"
+                                placeholder="review"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -81,12 +74,11 @@ export default function AdminLogin() {
                         </div>
 
                         <button className="btn btn-primary btn-full" type="submit" disabled={loading}>
-                            {loading ? 'Signing in...' : 'Sign in as HR'}
+                            {loading ? 'Signing in...' : 'Sign in as reviewer'}
                         </button>
 
-                        <div className="mt-md flex gap-sm" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <Link className="btn btn-outline btn-sm" to="/reviewer/login">Reviewer login</Link>
-                            <Link className="btn btn-outline btn-sm" to="/login">Candidate portal</Link>
+                        <div className="mt-md" style={{ textAlign: 'center' }}>
+                            <Link className="btn btn-outline btn-sm" to="/admin/login">HR login</Link>
                         </div>
                     </form>
                 </div>

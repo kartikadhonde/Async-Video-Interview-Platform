@@ -37,7 +37,6 @@ $services = @(
     @{ Name = 'Upload Service'; Dir = Join-Path $root 'upload-service'; Cmd = 'npm start' },
     @{ Name = 'Transcription Service'; Dir = Join-Path $root 'transcription-service'; Cmd = '.\\.venv\\Scripts\\Activate.ps1; python -m uvicorn main:app --host 0.0.0.0 --port 3002 --reload' },
     @{ Name = 'Feedback Service'; Dir = Join-Path $root 'feedback-service'; Cmd = 'npm start' },
-    @{ Name = 'Notification Service'; Dir = Join-Path $root 'notification-service'; Cmd = 'npm start' },
     @{ Name = 'Analytics Service'; Dir = Join-Path $root 'analytics-service'; Cmd = 'npm start' }
 )
 

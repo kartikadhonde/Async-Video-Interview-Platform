@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const Assignment = require('../models/assignment.model');
 
+function buildReviewerEmail(username) {
+  return `${username.toLowerCase()}@reviewer.local`;
+}
+
 async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -32,6 +36,56 @@ async function register(req, res) {
     res.status(201).json({ id: user._id, email: user.email, role: user.role });
   } catch (err) {
     res.status(500).json({ error: 'Registration failed' });
+  }
+}
+
+async function reviewerLogin(req, res) {
+  try {
+    const username = String(req.body?.username || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
+
+    if (!/^reviewer\d+$/.test(username)) {
+      return res.status(400).json({ error: 'Username must be in format reviewer1, reviewer2, ...' });
+    }
+
+    if (password !== 'review') {
+      return res.status(401).json({ error: 'Invalid reviewer credentials' });
+    }
+
+    const email = buildReviewerEmail(username);
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const password_hash = await bcrypt.hash('review', 10);
+      user = await User.create({
+        email,
+        password_hash,
+        role: 'reviewer',
+        company_id: 'reviewers',
+      });
+    }
+
+    if (user.role !== 'reviewer') {
+      return res.status(403).json({ error: 'User is not a reviewer' });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: 'reviewer', company_id: user.company_id },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    return res.json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        name: username,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Reviewer login failed' });
   }
 }
 
@@ -79,4 +133,4 @@ async function inviteLogin(req, res) {
   }
 }
 
-module.exports = { login, register, inviteLogin };
+module.exports = { login, register, inviteLogin, reviewerLogin };

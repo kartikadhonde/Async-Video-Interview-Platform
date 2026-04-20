@@ -18,6 +18,11 @@ app.post('/auth/login', createProxyMiddleware({
   changeOrigin: true,
 }));
 
+app.post('/auth/reviewer-login', createProxyMiddleware({
+  target: process.env.SCHEDULING_SERVICE_URL,
+  changeOrigin: true,
+}));
+
 app.post('/auth/register', createProxyMiddleware({
   target: process.env.SCHEDULING_SERVICE_URL,
   changeOrigin: true,

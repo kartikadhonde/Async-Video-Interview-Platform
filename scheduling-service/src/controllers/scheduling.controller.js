@@ -1,6 +1,7 @@
 const Session = require('../models/session.model');
 const QuestionSet = require('../models/questionSet.model');
 const Assignment = require('../models/assignment.model');
+const User = require('../models/user.model');
 const { v4: uuidv4 } = require('uuid');
 
 async function createSession(req, res) {
@@ -85,8 +86,38 @@ async function getAssignmentByToken(req, res) {
   }
 }
 
+async function listReviewersByIds(req, res) {
+  try {
+    const raw = String(req.query.ids || '').trim();
+    if (!raw) return res.json([]);
+
+    const ids = [...new Set(raw.split(',').map((id) => id.trim()).filter(Boolean))];
+    if (!ids.length) return res.json([]);
+
+    const reviewers = await User.find({ _id: { $in: ids }, role: 'reviewer' })
+      .select('_id email role')
+      .lean();
+
+    const result = reviewers.map((reviewer) => {
+      const email = reviewer.email || '';
+      const name = email.endsWith('@reviewer.local') ? email.replace('@reviewer.local', '') : email;
+      return {
+        id: String(reviewer._id),
+        email,
+        role: reviewer.role,
+        name,
+      };
+    });
+
+    return res.json(result);
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to list reviewers' });
+  }
+}
+
 module.exports = {
   createSession, listSessions, getSession,
   createQuestionSet, getQuestionSet,
   createAssignment, getAssignmentByToken, listAssignmentsBySession,
+  listReviewersByIds,
 };

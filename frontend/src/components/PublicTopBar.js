@@ -4,8 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const DEFAULT_LINKS = [
     { to: '/login', label: 'Candidate' },
     { to: '/admin/login', label: 'Admin' },
-    { to: '/reviewer', label: 'Reviewer' },
-    { to: '/tools/tokens', label: 'Tools' },
+    { to: '/reviewer/login', label: 'Reviewer' },
 ];
 
 export default function PublicTopBar({ links = DEFAULT_LINKS }) {

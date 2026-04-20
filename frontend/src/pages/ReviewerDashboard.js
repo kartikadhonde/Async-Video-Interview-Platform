@@ -2,14 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
+import { useAuth } from '../hooks/useAuth';
+import InterviewToolsPanel from '../components/InterviewToolsPanel';
 
 const STATUS_BADGE = { OPEN: 'badge-green', CLOSED: 'badge-gray', REVIEWING: 'badge-blue' };
 
 export default function ReviewerDashboard() {
+  const { user } = useAuth();
   const [reviewCards, setReviewCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || user.role !== 'reviewer') {
+      navigate('/reviewer/login', { replace: true });
+    }
+  }, [navigate, user]);
 
   useEffect(() => {
     async function loadReviewCards() {
@@ -73,28 +82,38 @@ export default function ReviewerDashboard() {
           {error && <div className="alert alert-error">{error}</div>}
 
           {loading ? <div className="spinner" /> : (
-            <div className="grid-2">
-              {reviewCards.length === 0 && (
-                <p className="text-muted">No sessions assigned to you yet.</p>
-              )}
-              {reviewCards.map((card) => (
-                <div className="card card-elevated" key={card.key}>
-                  <div className="flex-between" style={{ marginBottom: '.75rem' }}>
-                    <span className={`badge ${STATUS_BADGE[card.sessionStatus] || 'badge-gray'}`}>{card.sessionStatus}</span>
-                    {card.deadline && <span className="text-muted text-sm">{new Date(card.deadline).toLocaleDateString()}</span>}
+            <>
+              <div className="grid-2">
+                {reviewCards.length === 0 && (
+                  <p className="text-muted">No sessions assigned to you yet.</p>
+                )}
+                {reviewCards.map((card) => (
+                  <div className="card card-elevated" key={card.key}>
+                    <div className="flex-between" style={{ marginBottom: '.75rem' }}>
+                      <span className={`badge ${STATUS_BADGE[card.sessionStatus] || 'badge-gray'}`}>{card.sessionStatus}</span>
+                      {card.deadline && <span className="text-muted text-sm">{new Date(card.deadline).toLocaleDateString()}</span>}
+                    </div>
+                    <h3 style={{ marginBottom: '.35rem' }}>{card.candidateName}</h3>
+                    <p className="text-sm" style={{ marginBottom: '.35rem' }}>{card.sessionTitle}</p>
+                    <p className="text-sm" style={{ marginBottom: '1rem' }}>Session ID: {card.sessionId.slice(0, 8)}...</p>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => navigate(`/review/${card.sessionId}${card.candidateId ? `?candidate=${encodeURIComponent(card.candidateId)}` : ''}`)}
+                    >
+                      Open review room
+                    </button>
                   </div>
-                  <h3 style={{ marginBottom: '.35rem' }}>{card.candidateName}</h3>
-                  <p className="text-sm" style={{ marginBottom: '.35rem' }}>{card.sessionTitle}</p>
-                  <p className="text-sm" style={{ marginBottom: '1rem' }}>Session ID: {card.sessionId.slice(0, 8)}...</p>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => navigate(`/review/${card.sessionId}${card.candidateId ? `?candidate=${encodeURIComponent(card.candidateId)}` : ''}`)}
-                  >
-                    Open review room
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              <div className="card card-elevated mt-lg">
+                <InterviewToolsPanel
+                  embedded
+                  title="Reviewer Tools"
+                  description="Generate candidate invite tokens and check transcript readiness from your reviewer workspace."
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

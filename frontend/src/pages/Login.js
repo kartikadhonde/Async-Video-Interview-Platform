@@ -134,7 +134,6 @@ export default function Login() {
 
             <div className="mt-md flex gap-sm" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link className="btn btn-outline btn-sm" to="/admin/login">Admin sign in</Link>
-              <Link className="btn btn-outline btn-sm" to="/tools/tokens">Token tools</Link>
             </div>
           </form>
         </div>

@@ -41,11 +41,11 @@ The platform is made up of 7 independent microservices, each running as its own 
 | Service | Language | What it does |
 |---|---|---|
 | API Gateway | Node.js | Single entry point. Verifies JWT tokens. Routes requests to the right service. |
+| Question Service | Node.js | Returns the fixed 4 interview questions with a 60-second limit per question. |
 | Upload Service | Node.js | Accepts video chunks from the browser. Saves to MinIO. Publishes `video.uploaded` event. |
 | Transcription Service | Python | Consumes `video.uploaded`. Downloads video from MinIO. Runs Whisper. Saves transcript. Publishes `transcript.ready`. |
 | Feedback Service | Node.js | Reviewers post timestamped comments via WebSocket. Supports live co-review with Socket.io. |
 | Scheduling Service | Node.js | Manages interview sessions, question sets, candidate assignments, and invite tokens. |
-| Notification Service | Node.js | Stateless. Listens to RabbitMQ events and sends emails via Nodemailer. No database. |
 | Analytics Service | Node.js | Tracks candidate performance (from transcripts) and reviewer behaviour (from feedback events). |
 
 ### Infrastructure (runs via Docker)
@@ -454,8 +454,8 @@ Every service has its own `.env` file. These files are never committed to git. E
 | `TRANSCRIPTION_SERVICE_URL` | `http://localhost:3002` |
 | `FEEDBACK_SERVICE_URL` | `http://localhost:3003` |
 | `SCHEDULING_SERVICE_URL` | `http://localhost:3004` |
-| `NOTIFICATION_SERVICE_URL` | `http://localhost:3005` |
 | `ANALYTICS_SERVICE_URL` | `http://localhost:3006` |
+| `QUESTION_SERVICE_URL` | `http://localhost:3008` |
 
 ### 8.2 Upload Service
 
@@ -496,18 +496,7 @@ Every service has its own `.env` file. These files are never committed to git. E
 | `PORT` | `3004` |
 | `MONGO_URI` | `mongodb://localhost:27020/scheduling_db` |
 
-### 8.6 Notification Service
-
-| Variable | Value / Explanation |
-|---|---|
-| `PORT` | `3005` |
-| `RABBITMQ_URL` | `amqp://localhost` |
-| `SMTP_HOST` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` |
-| `SMTP_USER` | Your Gmail address |
-| `SMTP_PASS` | An App Password from Google Account > Security > 2-Step Verification > App Passwords |
-
-### 8.7 Analytics Service
+### 8.6 Analytics Service
 
 | Variable | Value / Explanation |
 |---|---|
@@ -515,6 +504,12 @@ Every service has its own `.env` file. These files are never committed to git. E
 | `MONGO_URI` | `mongodb://localhost:27021/analytics_db` |
 | `RABBITMQ_URL` | `amqp://localhost` |
 | `TRANSCRIPTION_SERVICE_URL` | `http://localhost:3002` |
+
+### 8.7 Question Service
+
+| Variable | Value / Explanation |
+|---|---|
+| `PORT` | `3008` |
 
 ### 8.8 Frontend
 
@@ -577,8 +572,8 @@ Use these exact names across all services:
 | Queue name | Used for |
 |---|---|
 | `video.uploaded` | Upload Service → Transcription Service |
-| `transcript.ready` | Transcription Service → Notification Service + Analytics Service |
-| `feedback.posted` | Feedback Service → Notification Service + Analytics Service |
+| `transcript.ready` | Transcription Service → Analytics Service |
+| `feedback.posted` | Feedback Service → Analytics Service |
 | `review.completed` | Feedback Service → Analytics Service |
 
 ### 10.2 Message Payload
@@ -590,11 +585,9 @@ Every message should be a JSON object. Minimum fields per event:
 - **`feedback.posted`**: `commentId`, `sessionId`, `reviewerId`, `videoTimestampMs`
 - **`review.completed`**: `sessionId`, `reviewerId`, `startedAt`, `completedAt`, `commentCount`
 
-### 10.3 Multiple Consumers for One Queue
+### 10.3 Event Distribution Pattern
 
-Some events have multiple consumers (e.g. `transcript.ready` goes to both Notification and Analytics). Use a **fanout exchange** — the message is delivered to all bound queues so both services receive a copy.
-
-> ⚠️ Using a direct queue with two consumers would load-balance messages, meaning each message only goes to ONE consumer. Use a fanout exchange for events with multiple consumers.
+Use a **fanout exchange** when an event should be consumed by multiple services, and a direct queue when only one service needs the event. In this codebase, analytics consumes transcript and feedback events.
 
 ### 10.4 Checking Queues
 
@@ -710,9 +703,9 @@ The frontend uses the `socket.io-client` package to connect to the Feedback Serv
 | Transcription Service | 3002 | Internal — reached via Gateway or Analytics direct call |
 | Feedback Service | 3003 | REST via Gateway + direct WebSocket from frontend |
 | Scheduling Service | 3004 | Internal — reached via Gateway or Feedback direct call |
-| Notification Service | 3005 | Internal — only triggered by RabbitMQ events |
 | Analytics Service | 3006 | Internal — reached via Gateway |
 | Frontend (React) | 3007 | Browser — `npm start` |
+| Question Service | 3008 | Internal — reached via Gateway |
 | MongoDB — Upload | 27017 | Docker container |
 | MongoDB — Transcription | 27018 | Docker container |
 | MongoDB — Feedback | 27019 | Docker container |
@@ -734,11 +727,11 @@ Services have dependencies. Start them in this order to avoid crashes.
 | 1 | `docker compose up -d` | All containers running — check with `docker compose ps` |
 | 2 | Create MinIO bucket | Go to `localhost:9001` and create the `videos` bucket if not already done |
 | 3 | `cd scheduling-service && node index.js` | 'Connected to MongoDB' and 'Server running on port 3004' |
-| 4 | `cd gateway && node index.js` | 'Gateway running on port 3000' |
-| 5 | `cd upload-service && node index.js` | 'Connected to MongoDB' and RabbitMQ connected message |
-| 6 | `cd transcription-service && uvicorn main:app --port 3002` | 'Whisper model loaded' — can take 30-60s on first run |
-| 7 | `cd feedback-service && node index.js` | 'Socket.io ready' and MongoDB connected |
-| 8 | `cd notification-service && node index.js` | RabbitMQ consumer started |
+| 4 | `cd question-service && node index.js` | 'Question Service running on port 3008' |
+| 5 | `cd gateway && node index.js` | 'Gateway running on port 3000' |
+| 6 | `cd upload-service && node index.js` | 'Connected to MongoDB' and RabbitMQ connected message |
+| 7 | `cd transcription-service && uvicorn main:app --port 3002` | 'Whisper model loaded' — can take 30-60s on first run |
+| 8 | `cd feedback-service && node index.js` | 'Socket.io ready' and MongoDB connected |
 | 9 | `cd analytics-service && node index.js` | All RabbitMQ consumers started |
 | 10 | `cd frontend && npm start` | Browser opens at `localhost:3000` (or 3007) |
 
@@ -781,7 +774,6 @@ Services have dependencies. Start them in this order to avoid crashes.
 - **Never query another service's MongoDB directly.** Always go through REST or RabbitMQ.
 - **Never put business logic in routes files.** Routes define paths, controllers handle logic.
 - The API Gateway does not contain business logic. It only verifies JWT and proxies requests.
-- The Notification Service has no database. It consumes events and sends emails. That is all it does.
 - RabbitMQ connections can fail on startup if RabbitMQ is not yet ready. Add retry logic in your `rabbitmq.js` config file.
 
 ### 16.6 Mac-Specific
