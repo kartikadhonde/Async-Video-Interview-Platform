@@ -97,6 +97,7 @@ Create them from examples if missing:
 ```powershell
 $services = @(
   "gateway",
+  "question-service",
   "upload-service",
   "transcription-service",
   "feedback-service",
@@ -185,6 +186,7 @@ On macOS, start each service manually in separate terminal tabs:
 
 ```bash
 cd scheduling-service && npm start
+cd question-service && npm start
 cd gateway && npm start
 cd upload-service && npm start
 cd transcription-service && source .venv/bin/activate && python -m uvicorn main:app --host 0.0.0.0 --port 3002 --reload
@@ -226,6 +228,7 @@ After startup, verify:
 Invoke-WebRequest http://localhost:3001/health | Select-Object StatusCode
 Invoke-WebRequest http://localhost:3002/health | Select-Object StatusCode
 Invoke-WebRequest http://localhost:3004/health | Select-Object StatusCode
+Invoke-WebRequest http://localhost:3008/health | Select-Object StatusCode
 ```
 
 Useful URLs:
@@ -241,6 +244,7 @@ Role routes:
 - Admin login (HR + reviewer): http://localhost:3007/admin/login
 - Reviewer dashboard: http://localhost:3007/reviewer
 - HR dashboard: http://localhost:3007/hr
+- Fixed questions API (via gateway): http://localhost:3000/questions/fixed
 
 ---
 
@@ -256,6 +260,14 @@ You can:
 - Check transcript status by video/job ID
 
 Candidate login now supports invite token based access.
+
+Candidate interview format is fixed:
+
+- Exactly 4 questions from Question Service
+- 60 seconds per question
+- One continuous recording for the full interview
+- Candidate can click Done / Next early per question
+- Final upload is a single video file at the end
 
 ---
 
@@ -325,6 +337,7 @@ Upload records may appear in collection named uploadjobs (mongoose default plura
 - 3005: Notification Service
 - 3006: Analytics Service
 - 3007: Frontend
+- 3008: Question Service
 - 5672: RabbitMQ AMQP
 - 15672: RabbitMQ Management UI
 - 9000: MinIO API

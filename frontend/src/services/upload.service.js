@@ -7,13 +7,23 @@ import api from './api';
  * @param {string} candidateId
  * @param {boolean} isFinal - true for the last chunk
  */
-export async function uploadChunk(chunk, sessionId, candidateId, isFinal = false, candidateName = '') {
+export async function uploadChunk(
+  chunk,
+  sessionId,
+  candidateId,
+  isFinal = false,
+  candidateName = '',
+  questionBoundaries = []
+) {
   const formData = new FormData();
   formData.append('chunk', chunk, 'chunk.webm');
   formData.append('session_id', sessionId);
   formData.append('candidate_id', candidateId);
   if (candidateName) {
     formData.append('candidate_name', String(candidateName));
+  }
+  if (Array.isArray(questionBoundaries) && questionBoundaries.length > 0) {
+    formData.append('question_boundaries', JSON.stringify(questionBoundaries));
   }
   formData.append('is_final', String(isFinal));
 
