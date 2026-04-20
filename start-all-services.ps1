@@ -32,7 +32,6 @@ if (-not $SkipDocker) {
 
 $services = @(
     @{ Name = 'Scheduling Service'; Dir = Join-Path $root 'scheduling-service'; Cmd = 'npm start' },
-    @{ Name = 'Question Service'; Dir = Join-Path $root 'question-service'; Cmd = 'npm start' },
     @{ Name = 'Gateway'; Dir = Join-Path $root 'gateway'; Cmd = 'npm start' },
     @{ Name = 'Upload Service'; Dir = Join-Path $root 'upload-service'; Cmd = 'npm start' },
     @{ Name = 'Transcription Service'; Dir = Join-Path $root 'transcription-service'; Cmd = '.\\.venv\\Scripts\\Activate.ps1; python -m uvicorn main:app --host 0.0.0.0 --port 3002 --reload' },
