@@ -215,15 +215,9 @@ docker compose stop
 
 ---
 
-## 8) Health Checks
+## 8) Useful URLs
 
-After startup, verify:
-
-```powershell
-Invoke-WebRequest http://localhost:3001/health | Select-Object StatusCode
-Invoke-WebRequest http://localhost:3002/health | Select-Object StatusCode
-Invoke-WebRequest http://localhost:3004/health | Select-Object StatusCode
-```
+After startup, verify services using their functional endpoints/pages.
 
 Useful URLs:
 

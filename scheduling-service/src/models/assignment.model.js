@@ -1,4 +1,8 @@
+// Purpose: Define data models and schema rules.
+
 const mongoose = require('mongoose');
+
+// Main flow: Execute core operations and return results.
 
 const assignmentSchema = new mongoose.Schema({
   session_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Session', required: true },

@@ -1,5 +1,9 @@
+// Purpose: Render reusable UI components.
+
 import React, { useRef, useState } from 'react';
 import { useMediaRecorder } from '../hooks/useMediaRecorder';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function VideoRecorder({ sessionId, candidateId, candidateName, onComplete }) {
   const videoRef = useRef(null);
@@ -7,6 +11,7 @@ export default function VideoRecorder({ sessionId, candidateId, candidateName, o
   const [stopping, setStopping] = useState(false);
   const [error, setError] = useState('');
 
+  // Function: handleStart - Handles start.
   async function handleStart() {
     try {
       setError('');
@@ -25,6 +30,7 @@ export default function VideoRecorder({ sessionId, candidateId, candidateName, o
     }
   }
 
+  // Function: handleStop - Handles stop.
   async function handleStop() {
     setStopping(true);
     await stopRecording();

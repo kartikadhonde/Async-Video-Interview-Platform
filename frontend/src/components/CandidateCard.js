@@ -1,4 +1,8 @@
+// Purpose: Render reusable UI components.
+
 import React from 'react';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function CandidateCard({ session, onReview }) {
   return (

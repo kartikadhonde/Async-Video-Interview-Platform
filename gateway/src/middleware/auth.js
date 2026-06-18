@@ -1,5 +1,10 @@
+// Purpose: Forward and coordinate gateway requests.
+
 const jwt = require('jsonwebtoken');
 
+// Main flow: Initialize dependencies and run module logic.
+
+// Function: verifyToken - Verifies token.
 function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

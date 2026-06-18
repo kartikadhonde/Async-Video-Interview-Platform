@@ -1,8 +1,13 @@
+// Purpose: Handle requests and shape responses.
+
 const UploadJob = require('../models/uploadJob.model');
 const minioService = require('../services/minio.service');
 const { publishVideoUploaded } = require('../services/rabbitmq.service');
 const { v4: uuidv4 } = require('uuid');
 
+// Main flow: Validate input, call services, return output.
+
+// Function: uploadChunk - Uploads a video chunk, stores upload metadata, and publishes event on final submission.
 async function uploadChunk(req, res) {
   try {
     const { session_id, candidate_id, candidate_name, is_final } = req.body;
@@ -16,7 +21,6 @@ async function uploadChunk(req, res) {
           questionBoundaries = parsed;
         }
       } catch (err) {
-        console.warn('Invalid question_boundaries payload. Ignoring.');
       }
     }
 
@@ -48,11 +52,11 @@ async function uploadChunk(req, res) {
 
     res.status(201).json({ jobId: job._id, status: job.status });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Upload failed' });
   }
 }
 
+// Function: getJob - Returns upload job details by job id.
 async function getJob(req, res) {
   try {
     const job = await UploadJob.findById(req.params.jobId);
@@ -63,6 +67,7 @@ async function getJob(req, res) {
   }
 }
 
+// Function: getLatestSessionVideo - Returns signed playback URL for the latest completed session video.
 async function getLatestSessionVideo(req, res) {
   try {
     const { sessionId } = req.params;
@@ -93,11 +98,11 @@ async function getLatestSessionVideo(req, res) {
       created_at: latestCompleteJob.created_at,
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Failed to fetch latest session video' });
   }
 }
 
+// Function: getLatestSessionVideosByCandidate - Returns latest completed video per candidate for a session.
 async function getLatestSessionVideosByCandidate(req, res) {
   try {
     const { sessionId } = req.params;
@@ -145,11 +150,11 @@ async function getLatestSessionVideosByCandidate(req, res) {
 
     res.json({ session_id: sessionId, candidates: results });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Failed to fetch candidate videos' });
   }
 }
 
+// Function: getLatestVideoByCandidate - Returns signed playback URL for the latest completed candidate video.
 async function getLatestVideoByCandidate(req, res) {
   try {
     const { sessionId, candidateId } = req.params;
@@ -183,7 +188,6 @@ async function getLatestVideoByCandidate(req, res) {
       created_at: latestCompleteJob.created_at,
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Failed to fetch latest candidate video' });
   }
 }

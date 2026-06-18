@@ -1,8 +1,13 @@
+// Purpose: Provide reusable service/business logic.
+
 const axios = require('axios');
 const { getChannel } = require('../config/rabbitmq');
 const CandidateMetrics = require('../models/candidateMetrics.model');
 const ReviewerMetrics = require('../models/reviewerMetrics.model');
 
+// Main flow: Execute core operations and return results.
+
+// Function: bindAndConsume - Handles bind and consume.
 async function bindAndConsume(channel, exchange, handler) {
   await channel.assertExchange(exchange, 'fanout', { durable: true });
   const q = await channel.assertQueue('', { exclusive: true });
@@ -15,11 +20,11 @@ async function bindAndConsume(channel, exchange, handler) {
   });
 }
 
+// Function: startConsumers - Starts consumers.
 async function startConsumers() {
   const channel = getChannel();
 
   await bindAndConsume(channel, 'transcript.ready', async (payload) => {
-    console.log('Analytics: transcript.ready received', payload);
     const { data: transcript } = await axios.get(
       `${process.env.TRANSCRIPTION_SERVICE_URL}/transcription/${payload.videoId}`
     );
@@ -37,7 +42,6 @@ async function startConsumers() {
   });
 
   await bindAndConsume(channel, 'feedback.posted', async (payload) => {
-    console.log('Analytics: feedback.posted received', payload);
     // Upsert reviewer metrics — increment comment count
     await ReviewerMetrics.findOneAndUpdate(
       { reviewer_id: payload.reviewerId, session_id: payload.sessionId },
@@ -47,7 +51,6 @@ async function startConsumers() {
   });
 
   await bindAndConsume(channel, 'review.completed', async (payload) => {
-    console.log('Analytics: review.completed received', payload);
     await ReviewerMetrics.findOneAndUpdate(
       { reviewer_id: payload.reviewerId, session_id: payload.sessionId },
       {
@@ -60,8 +63,6 @@ async function startConsumers() {
       { upsert: true }
     );
   });
-
-  console.log('Analytics Service: All RabbitMQ consumers started');
 }
 
 module.exports = { startConsumers };

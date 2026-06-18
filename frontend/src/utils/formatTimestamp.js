@@ -1,3 +1,7 @@
+// Purpose: Implement module logic for this feature.
+
+// Main flow: Initialize dependencies and run module logic.
+
 /**
  * Convert milliseconds to mm:ss display format.
  * @param {number} ms

@@ -1,6 +1,11 @@
+// Purpose: Handle requests and shape responses.
+
 const CandidateMetrics = require('../models/candidateMetrics.model');
 const ReviewerMetrics = require('../models/reviewerMetrics.model');
 
+// Main flow: Validate input, call services, return output.
+
+// Function: getCandidateMetrics - Returns candidate metrics.
 async function getCandidateMetrics(req, res) {
   try {
     const metrics = await CandidateMetrics.find({ candidate_id: req.params.candidateId });
@@ -10,6 +15,7 @@ async function getCandidateMetrics(req, res) {
   }
 }
 
+// Function: getSessionCandidates - Returns session candidates.
 async function getSessionCandidates(req, res) {
   try {
     const metrics = await CandidateMetrics.find({ session_id: req.params.sessionId }).sort({ overall_rank: 1 });
@@ -19,6 +25,7 @@ async function getSessionCandidates(req, res) {
   }
 }
 
+// Function: getReviewerMetrics - Returns reviewer metrics.
 async function getReviewerMetrics(req, res) {
   try {
     const metrics = await ReviewerMetrics.find({ reviewer_id: req.params.reviewerId });

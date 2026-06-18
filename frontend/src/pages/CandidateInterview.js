@@ -1,8 +1,12 @@
+// Purpose: Implement page-level UI and behavior.
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../services/api';
 import PublicTopBar from '../components/PublicTopBar';
 import { useMediaRecorder } from '../hooks/useMediaRecorder';
+
+// Main flow: Initialize dependencies and run module logic.
 
 const FALLBACK_FIXED_QUESTIONS = [
   { id: 'q1', text: 'Introduce yourself', time_limit_seconds: 60, order: 1 },
@@ -33,6 +37,7 @@ export default function CandidateInterview() {
     candidateName
   );
 
+  // Function: nowMsSinceInterviewStart - Handles now ms since interview start.
   function nowMsSinceInterviewStart() {
     if (!interviewStartRef.current) return 0;
     return Date.now() - interviewStartRef.current;
@@ -44,6 +49,7 @@ export default function CandidateInterview() {
       return;
     }
 
+    // Function: loadInterview - Handles load interview.
     async function loadInterview() {
       try {
         const { data } = await api.get(`/scheduling/assignments/${token}`);
@@ -86,6 +92,7 @@ export default function CandidateInterview() {
     return () => clearInterval(timer);
   }, [isRecording, done, questions.length, currentQuestion]);
 
+  // Function: handleStartInterview - Handles start interview.
   async function handleStartInterview() {
     try {
       setError('');
@@ -111,6 +118,7 @@ export default function CandidateInterview() {
     }
   }
 
+  // Function: handleNextQuestion - Handles next question.
   function handleNextQuestion() {
     if (!isRecording || done || !questions.length) return;
 
@@ -141,6 +149,7 @@ export default function CandidateInterview() {
     handleFinishInterview(updated);
   }
 
+  // Function: handleFinishInterview - Handles finish interview.
   async function handleFinishInterview(preparedBoundaries = null) {
     if (!isRecording) return;
 

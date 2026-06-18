@@ -1,9 +1,14 @@
+// Purpose: Handle requests and shape responses.
+
 const Comment = require('../models/comment.model');
 const ReviewSession = require('../models/reviewSession.model');
 const ReviewerRating = require('../models/reviewerRating.model');
 const { publishEvent } = require('../services/rabbitmq.service');
 const { getIO } = require('../services/socket.service');
 
+// Main flow: Validate input, call services, return output.
+
+// Function: toScore - Handles to score.
 function toScore(value) {
   const score = Number(value);
   if (Number.isNaN(score)) return null;
@@ -11,6 +16,7 @@ function toScore(value) {
   return score;
 }
 
+// Function: postComment - Handles post comment.
 async function postComment(req, res) {
   try {
     const { session_id, candidate_id, reviewer_id, video_timestamp_ms, text } = req.body;
@@ -30,11 +36,11 @@ async function postComment(req, res) {
 
     res.status(201).json(comment);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Failed to post comment' });
   }
 }
 
+// Function: getComments - Returns comments.
 async function getComments(req, res) {
   try {
     const filter = { session_id: req.params.sessionId };
@@ -49,6 +55,7 @@ async function getComments(req, res) {
   }
 }
 
+// Function: completeReview - Handles complete review.
 async function completeReview(req, res) {
   try {
     const { reviewer_id, started_at } = req.body;
@@ -79,6 +86,7 @@ async function completeReview(req, res) {
   }
 }
 
+// Function: upsertRating - Handles upsert rating.
 async function upsertRating(req, res) {
   try {
     const { session_id, candidate_id, reviewer_id, metrics } = req.body;
@@ -128,6 +136,7 @@ async function upsertRating(req, res) {
   }
 }
 
+// Function: getRatings - Returns ratings.
 async function getRatings(req, res) {
   try {
     const filter = { session_id: req.params.sessionId };

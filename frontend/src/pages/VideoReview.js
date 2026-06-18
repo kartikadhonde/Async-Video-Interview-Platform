@@ -1,3 +1,5 @@
+// Purpose: Implement page-level UI and behavior.
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -7,6 +9,8 @@ import ReviewerRatingPanel from '../components/ReviewerRatingPanel';
 import TranscriptViewer from '../components/TranscriptViewer';
 import { useSocket } from '../hooks/useSocket';
 import api from '../services/api';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function VideoReview() {
   const { sessionId } = useParams();

@@ -1,5 +1,9 @@
+// Purpose: Share reusable hook and state logic.
+
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
+
+// Main flow: Initialize dependencies and run module logic.
 
 /**
  * Connect to the Feedback Service Socket.io server and join a session room.
@@ -28,6 +32,7 @@ export function useSocket(sessionId, onNewComment) {
     };
   }, [sessionId]);
 
+  // Function: emitComment - Handles emit comment.
   function emitComment(data) {
     socketRef.current?.emit('post-comment', { ...data, sessionId });
   }

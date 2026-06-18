@@ -1,4 +1,8 @@
+// Purpose: Define endpoint routes and route wiring.
+
 const express = require('express');
+// Main flow: Map routes to handlers and middleware.
+
 const router = express.Router();
 const analyticsController = require('../controllers/analytics.controller');
 

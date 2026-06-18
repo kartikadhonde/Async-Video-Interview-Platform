@@ -1,0 +1,127 @@
+## [root]
+ - .env
+ - .gitignore
+ - docker-compose.yml
+ - interview_platform_setup_guide.md
+ - RUN.md
+ - start-all-services.ps1
+ - stop-all-services.ps1
+
+## analytics-service
+ - analytics-service/.env
+ - analytics-service/.env.example
+ - analytics-service/index.js
+ - analytics-service/package.json
+ - analytics-service/src/app.js
+ - analytics-service/src/config/db.js
+ - analytics-service/src/config/rabbitmq.js
+ - analytics-service/src/consumers/events.consumer.js
+ - analytics-service/src/controllers/analytics.controller.js
+ - analytics-service/src/models/candidateMetrics.model.js
+ - analytics-service/src/models/reviewerMetrics.model.js
+ - analytics-service/src/routes/analytics.routes.js
+
+## feedback-service
+ - feedback-service/.env
+ - feedback-service/.env.example
+ - feedback-service/index.js
+ - feedback-service/package.json
+ - feedback-service/src/app.js
+ - feedback-service/src/config/db.js
+ - feedback-service/src/config/rabbitmq.js
+ - feedback-service/src/controllers/feedback.controller.js
+ - feedback-service/src/models/comment.model.js
+ - feedback-service/src/models/reviewerRating.model.js
+ - feedback-service/src/models/reviewSession.model.js
+ - feedback-service/src/routes/feedback.routes.js
+ - feedback-service/src/services/rabbitmq.service.js
+ - feedback-service/src/services/socket.service.js
+
+## frontend
+ - frontend/.env
+ - frontend/.env.example
+ - frontend/package.json
+ - frontend/public/index.html
+ - frontend/src/App.js
+ - frontend/src/components/CandidateCard.js
+ - frontend/src/components/CommentPanel.js
+ - frontend/src/components/InterviewToolsPanel.js
+ - frontend/src/components/Navbar.js
+ - frontend/src/components/PublicTopBar.js
+ - frontend/src/components/ReviewerRatingPanel.js
+ - frontend/src/components/TranscriptViewer.js
+ - frontend/src/components/VideoPlayer.js
+ - frontend/src/components/VideoRecorder.js
+ - frontend/src/context/AuthContext.js
+ - frontend/src/hooks/useAuth.js
+ - frontend/src/hooks/useMediaRecorder.js
+ - frontend/src/hooks/useSocket.js
+ - frontend/src/index.css
+ - frontend/src/index.js
+ - frontend/src/pages/AdminLogin.js
+ - frontend/src/pages/AnalyticsDashboard.js
+ - frontend/src/pages/CandidateInterview.js
+ - frontend/src/pages/HRDashboard.js
+ - frontend/src/pages/Login.js
+ - frontend/src/pages/ReviewerDashboard.js
+ - frontend/src/pages/ReviewerLogin.js
+ - frontend/src/pages/VideoReview.js
+ - frontend/src/services/api.js
+ - frontend/src/services/upload.service.js
+ - frontend/src/utils/formatTimestamp.js
+
+## gateway
+ - gateway/.env
+ - gateway/.env.example
+ - gateway/index.js
+ - gateway/package.json
+ - gateway/src/app.js
+ - gateway/src/middleware/auth.js
+
+## scheduling-service
+ - scheduling-service/.env
+ - scheduling-service/.env.example
+ - scheduling-service/index.js
+ - scheduling-service/package.json
+ - scheduling-service/src/app.js
+ - scheduling-service/src/config/db.js
+ - scheduling-service/src/controllers/auth.controller.js
+ - scheduling-service/src/controllers/scheduling.controller.js
+ - scheduling-service/src/models/assignment.model.js
+ - scheduling-service/src/models/questionSet.model.js
+ - scheduling-service/src/models/session.model.js
+ - scheduling-service/src/models/user.model.js
+ - scheduling-service/src/routes/auth.routes.js
+ - scheduling-service/src/routes/scheduling.routes.js
+
+## transcription-service
+ - transcription-service/.env
+ - transcription-service/.env.example
+ - transcription-service/app/__init__.py
+ - transcription-service/app/config/settings.py
+ - transcription-service/app/models/transcript.py
+ - transcription-service/app/routes/transcription.py
+ - transcription-service/app/services/minio_service.py
+ - transcription-service/app/services/rabbitmq_service.py
+ - transcription-service/app/services/whisper_service.py
+ - transcription-service/app/workers/consumer.py
+ - transcription-service/e2e_transcription_stderr.log
+ - transcription-service/e2e_transcription_stdout.log
+ - transcription-service/main.py
+ - transcription-service/requirements.txt
+
+## upload-service
+ - upload-service/.env
+ - upload-service/.env.example
+ - upload-service/index.js
+ - upload-service/package.json
+ - upload-service/src/app.js
+ - upload-service/src/config/db.js
+ - upload-service/src/config/minio.js
+ - upload-service/src/config/rabbitmq.js
+ - upload-service/src/controllers/upload.controller.js
+ - upload-service/src/models/uploadJob.model.js
+ - upload-service/src/routes/upload.routes.js
+ - upload-service/src/services/minio.service.js
+ - upload-service/src/services/rabbitmq.service.js
+

@@ -1,8 +1,12 @@
+// Purpose: Implement page-level UI and behavior.
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import PublicTopBar from '../components/PublicTopBar';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function Login() {
   const { login } = useAuth();
@@ -15,6 +19,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Function: handleSubmit - Handles submit.
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');

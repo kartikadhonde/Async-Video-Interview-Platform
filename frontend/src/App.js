@@ -1,3 +1,5 @@
+// Purpose: Implement module logic for this feature.
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -10,6 +12,9 @@ import VideoReview from './pages/VideoReview';
 import HRDashboard from './pages/HRDashboard';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 
+// Main flow: Initialize dependencies and run module logic.
+
+// Function: App - Handles app.
 function App() {
   return (
     <AuthProvider>

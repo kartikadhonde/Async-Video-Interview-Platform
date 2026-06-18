@@ -1,12 +1,17 @@
+// Purpose: Render reusable UI components.
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const homePath = user?.role === 'reviewer' ? '/reviewer' : '/hr';
 
+  // Function: handleLogout - Handles logout.
   function handleLogout() {
     const nextPath = user?.role === 'reviewer' ? '/reviewer/login' : '/admin/login';
     logout();

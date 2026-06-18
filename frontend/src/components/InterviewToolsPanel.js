@@ -1,13 +1,19 @@
+// Purpose: Render reusable UI components.
+
 import React, { useMemo, useState } from 'react';
 import axios from 'axios';
+
+// Main flow: Initialize dependencies and run module logic.
 
 const SCHEDULING_DIRECT_BASE = process.env.REACT_APP_SCHEDULING_URL || 'http://localhost:3004';
 const TRANSCRIPTION_DIRECT_BASE = process.env.REACT_APP_TRANSCRIPTION_URL || 'http://localhost:3002';
 
+// Function: extractError - Handles extract error.
 function extractError(err) {
     return err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Request failed';
 }
 
+// Function: isNetworkError - Handles is network error.
 function isNetworkError(err) {
     return !err?.response && String(err?.message || '').toLowerCase().includes('network');
 }
@@ -29,6 +35,7 @@ export default function InterviewToolsPanel({ title = 'Invite + Transcript Tools
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    // Function: handleGenerateInviteToken - Handles generate invite token.
     async function handleGenerateInviteToken() {
         setLoading(true);
         setError('');
@@ -74,6 +81,7 @@ export default function InterviewToolsPanel({ title = 'Invite + Transcript Tools
         }
     }
 
+    // Function: handleCheckTranscript - Handles check transcript.
     async function handleCheckTranscript() {
         setLoading(true);
         setError('');

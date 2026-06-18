@@ -1,4 +1,8 @@
+// Purpose: Define data models and schema rules.
+
 const mongoose = require('mongoose');
+
+// Main flow: Execute core operations and return results.
 
 const reviewerMetricsSchema = new mongoose.Schema({
   reviewer_id: { type: String, required: true },

@@ -1,9 +1,13 @@
+// Purpose: Implement page-level UI and behavior.
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import InterviewToolsPanel from '../components/InterviewToolsPanel';
+
+// Main flow: Initialize dependencies and run module logic.
 
 const STATUS_BADGE = { OPEN: 'badge-green', CLOSED: 'badge-gray', REVIEWING: 'badge-blue' };
 
@@ -21,6 +25,7 @@ export default function ReviewerDashboard() {
   }, [navigate, user]);
 
   useEffect(() => {
+    // Function: loadReviewCards - Handles load review cards.
     async function loadReviewCards() {
       try {
         const { data: sessions } = await api.get('/scheduling/sessions');

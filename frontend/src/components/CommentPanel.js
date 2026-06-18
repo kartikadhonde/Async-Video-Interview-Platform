@@ -1,7 +1,11 @@
+// Purpose: Render reusable UI components.
+
 import React, { useState } from 'react';
 import { formatTimestamp } from '../utils/formatTimestamp';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function CommentPanel({ comments, sessionId, candidateId, currentTimeMs, onNewComment }) {
   const { user } = useAuth();
@@ -10,6 +14,7 @@ export default function CommentPanel({ comments, sessionId, candidateId, current
   const [inputError, setInputError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Function: parseTimestampToMs - Handles parse timestamp to ms.
   function parseTimestampToMs(raw) {
     const value = String(raw || '').trim();
     if (!value) return currentTimeMs;
@@ -19,6 +24,7 @@ export default function CommentPanel({ comments, sessionId, candidateId, current
     return (minutes * 60 + seconds) * 1000;
   }
 
+  // Function: handleSubmit - Handles submit.
   async function handleSubmit(e) {
     e.preventDefault();
     if (!text.trim() || !candidateId) return;

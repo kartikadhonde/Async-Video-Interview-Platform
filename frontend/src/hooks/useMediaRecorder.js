@@ -1,5 +1,9 @@
+// Purpose: Share reusable hook and state logic.
+
 import { useRef, useState } from 'react';
 import { uploadChunk } from '../services/upload.service';
+
+// Main flow: Initialize dependencies and run module logic.
 
 /**
  * Hook wrapping the browser MediaRecorder API with chunked upload.
@@ -10,6 +14,7 @@ export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
   const chunksRef = useRef([]);
   const [recording, setRecording] = useState(false);
 
+  // Function: getFallbackUserMedia - Returns fallback user media.
   async function getFallbackUserMedia() {
     try {
       return await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -19,6 +24,7 @@ export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
     }
   }
 
+  // Function: startRecording - Starts recording.
   async function startRecording(existingStream) {
     const stream = existingStream || await getFallbackUserMedia();
     // Pick the best mimeType that includes audio (opus) so Whisper has audio to transcribe
@@ -42,6 +48,7 @@ export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
     setRecording(true);
   }
 
+  // Function: stopRecording - Handles stop recording.
   async function stopRecording(uploadMeta = {}) {
     return new Promise((resolve) => {
       const recorder = mediaRecorderRef.current;

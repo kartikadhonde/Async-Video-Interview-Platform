@@ -1,3 +1,5 @@
+# Purpose: Run background transcription jobs.
+
 import json
 import os
 import time
@@ -10,13 +12,15 @@ from app.config.settings import get_db
 from app.services import minio_service, rabbitmq_service, whisper_service
 
 
+# Main flow: Execute core operations and return results.
+
+# Function: handle_video_uploaded - Processes uploaded-video events and stores generated transcripts.
 def handle_video_uploaded(ch, method, properties, body):
     payload = None
     local_path = None
 
     try:
         payload = json.loads(body)
-        print(f"Received video.uploaded event: {payload}")
 
         video_id = payload["videoId"]
         session_id = payload["sessionId"]
@@ -29,7 +33,6 @@ def handle_video_uploaded(ch, method, properties, body):
         # Prevent duplicate processing for the same uploaded video job.
         existing = db["transcripts"].find_one({"video_id": video_id}, {"_id": 1})
         if existing:
-            print(f"Transcript already exists for video_id={video_id}. Skipping.")
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
 
@@ -67,11 +70,7 @@ def handle_video_uploaded(ch, method, properties, body):
         )
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
-        print(f"Transcription complete for video_id={video_id}")
     except Exception as exc:
-        print(f"Failed to process video.uploaded event: {exc}")
-        print(traceback.format_exc())
-
         try:
             db = get_db()
             db["transcription_failures"].insert_one(
@@ -82,8 +81,8 @@ def handle_video_uploaded(ch, method, properties, body):
                     "created_at": datetime.utcnow(),
                 }
             )
-        except Exception as log_exc:
-            print(f"Failed to persist transcription error: {log_exc}")
+        except Exception:
+            pass
 
         # Drop failed events to avoid poison-message retry loops.
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
@@ -91,10 +90,11 @@ def handle_video_uploaded(ch, method, properties, body):
         if local_path and os.path.exists(local_path):
             try:
                 os.remove(local_path)
-            except Exception as cleanup_exc:
-                print(f"Failed to remove temp file {local_path}: {cleanup_exc}")
+            except Exception:
+                pass
 
 
+# Function: start_consumer - Starts and maintains the RabbitMQ consumer loop.
 def start_consumer():
     url = os.getenv("RABBITMQ_URL", "amqp://localhost")
     queue_name = os.getenv("VIDEO_UPLOADED_QUEUE", "transcription.video.uploaded")
@@ -116,13 +116,8 @@ def start_consumer():
                 on_message_callback=handle_video_uploaded,
                 auto_ack=False,
             )
-
-            print(
-                f"Transcription Service: Waiting for video.uploaded events on queue '{queue_name}'..."
-            )
             channel.start_consuming()
-        except Exception as exc:
-            print(f"RabbitMQ consumer error: {exc}. Reconnecting in 5s...")
+        except Exception:
             time.sleep(5)
         finally:
             if connection:

@@ -1,8 +1,13 @@
+# Purpose: Provide reusable service/business logic.
+
 import os
 import boto3
 import tempfile
 
 
+# Main flow: Execute core operations and return results.
+
+# Function: get_s3_client - Returns s3 client.
 def get_s3_client():
     return boto3.client(
         's3',
@@ -13,6 +18,7 @@ def get_s3_client():
     )
 
 
+# Function: download_video - Handles download video.
 def download_video(minio_url: str) -> str:
     """Download a video from MinIO to a temp file. Returns the local file path."""
     # Parse the key from the URL

@@ -1,7 +1,11 @@
+# Purpose: Define data models and schema rules.
+
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
+
+# Main flow: Execute core operations and return results.
 
 class TranscriptSegment(BaseModel):
     start_ms: int

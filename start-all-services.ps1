@@ -1,3 +1,5 @@
+# Purpose: Provide reusable service/business logic.
+
 param(
     [switch]$SkipDocker,
     [switch]$IncludeFrontend
@@ -6,6 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 
+# Function: Start - Starts the process.
 function Start-ServiceTerminal {
     param(
         [string]$Name,

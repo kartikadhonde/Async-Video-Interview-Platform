@@ -1,9 +1,14 @@
+// Purpose: Handle requests and shape responses.
+
 const Session = require('../models/session.model');
 const QuestionSet = require('../models/questionSet.model');
 const Assignment = require('../models/assignment.model');
 const User = require('../models/user.model');
 const { v4: uuidv4 } = require('uuid');
 
+// Main flow: Validate input, call services, return output.
+
+// Function: createSession - Creates session.
 async function createSession(req, res) {
   try {
     const session = await Session.create(req.body);
@@ -13,6 +18,7 @@ async function createSession(req, res) {
   }
 }
 
+// Function: listSessions - Lists sessions.
 async function listSessions(req, res) {
   try {
     const sessions = await Session.find().sort({ created_at: -1 });
@@ -22,6 +28,7 @@ async function listSessions(req, res) {
   }
 }
 
+// Function: getSession - Returns session.
 async function getSession(req, res) {
   try {
     const session = await Session.findById(req.params.sessionId);
@@ -32,6 +39,7 @@ async function getSession(req, res) {
   }
 }
 
+// Function: createQuestionSet - Creates question set.
 async function createQuestionSet(req, res) {
   try {
     const qs = await QuestionSet.create(req.body);
@@ -41,6 +49,7 @@ async function createQuestionSet(req, res) {
   }
 }
 
+// Function: getQuestionSet - Returns question set.
 async function getQuestionSet(req, res) {
   try {
     const qs = await QuestionSet.findById(req.params.id);
@@ -51,6 +60,7 @@ async function getQuestionSet(req, res) {
   }
 }
 
+// Function: createAssignment - Creates assignment.
 async function createAssignment(req, res) {
   try {
     const { session_id, candidate_id, candidate_profile } = req.body;
@@ -66,6 +76,7 @@ async function createAssignment(req, res) {
   }
 }
 
+// Function: listAssignmentsBySession - Lists assignments by session.
 async function listAssignmentsBySession(req, res) {
   try {
     const { sessionId } = req.params;
@@ -76,6 +87,7 @@ async function listAssignmentsBySession(req, res) {
   }
 }
 
+// Function: getAssignmentByToken - Returns assignment by token.
 async function getAssignmentByToken(req, res) {
   try {
     const assignment = await Assignment.findOne({ invite_token: req.params.token });
@@ -86,6 +98,7 @@ async function getAssignmentByToken(req, res) {
   }
 }
 
+// Function: listReviewersByIds - Lists reviewers by ids.
 async function listReviewersByIds(req, res) {
   try {
     const raw = String(req.query.ids || '').trim();

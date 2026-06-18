@@ -1,11 +1,16 @@
+// Purpose: Implement page-level UI and behavior.
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
 import InterviewToolsPanel from '../components/InterviewToolsPanel';
 
+// Main flow: Initialize dependencies and run module logic.
+
 const STATUS_BADGE = { OPEN: 'badge-green', CLOSED: 'badge-gray', REVIEWING: 'badge-blue' };
 
+// Function: average - Handles average.
 function average(values) {
   if (!values.length) return 0;
   return values.reduce((acc, value) => acc + value, 0) / values.length;
@@ -19,6 +24,7 @@ export default function HRDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Function: loadDashboardRows - Handles load dashboard rows.
     async function loadDashboardRows() {
       try {
         const { data: sessions } = await api.get('/scheduling/sessions');

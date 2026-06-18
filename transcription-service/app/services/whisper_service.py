@@ -1,10 +1,15 @@
+# Purpose: Provide reusable service/business logic.
+
 import os
 import shutil
 import whisper
 
+# Main flow: Execute core operations and return results.
+
 _model = None
 
 
+# Function: _resolve_ffmpeg - Handles resolve ffmpeg.
 def _resolve_ffmpeg() -> str:
     """Ensure ffmpeg is discoverable for Whisper's subprocess call."""
     configured = os.getenv("FFMPEG_PATH", "").strip()
@@ -25,19 +30,18 @@ def _resolve_ffmpeg() -> str:
     return ffmpeg_bin
 
 
+# Function: get_model - Returns model.
 def get_model():
     global _model
     if _model is None:
         model_name = os.getenv("WHISPER_MODEL", "base")
-        print(f"Loading Whisper model: {model_name}")
         _model = whisper.load_model(model_name)
-        print("Whisper model loaded")
     return _model
 
 
+# Function: transcribe - Handles transcribe.
 def transcribe(file_path: str) -> dict:
-    ffmpeg_bin = _resolve_ffmpeg()
-    print(f"Using ffmpeg: {ffmpeg_bin}")
+    _resolve_ffmpeg()
     model = get_model()
     result = model.transcribe(file_path)
     return result

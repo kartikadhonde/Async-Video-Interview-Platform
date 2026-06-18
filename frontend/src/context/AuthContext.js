@@ -1,4 +1,8 @@
+// Purpose: Provide shared context/state values.
+
 import React, { createContext, useContext, useState } from 'react';
+
+// Main flow: Initialize dependencies and run module logic.
 
 const AuthContext = createContext(null);
 
@@ -10,6 +14,7 @@ export function AuthProvider({ children }) {
 
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
 
+  // Function: login - Handles login.
   function login(userData, jwt) {
     setUser(userData);
     setToken(jwt);
@@ -17,6 +22,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', jwt);
   }
 
+  // Function: logout - Handles logout.
   function logout() {
     setUser(null);
     setToken(null);

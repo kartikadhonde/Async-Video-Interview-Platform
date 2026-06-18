@@ -1,4 +1,8 @@
+// Purpose: Load and expose configuration values.
+
 const { S3Client } = require('@aws-sdk/client-s3');
+
+// Main flow: Execute core operations and return results.
 
 const s3Client = new S3Client({
   endpoint: process.env.MINIO_ENDPOINT,

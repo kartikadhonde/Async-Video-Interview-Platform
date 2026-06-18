@@ -1,6 +1,10 @@
+// Purpose: Render reusable UI components.
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
+
+// Main flow: Initialize dependencies and run module logic.
 
 const METRICS = [
     { key: 'communication_score', label: 'Communication' },
@@ -28,6 +32,7 @@ export default function ReviewerRatingPanel({ sessionId, candidateId, onSaved })
     useEffect(() => {
         if (!sessionId || !candidateId || !user?.id) return;
 
+        // Function: fetchExistingRating - Handles fetch existing rating.
         async function fetchExistingRating() {
             setLoading(true);
             setMessage('');
@@ -61,6 +66,7 @@ export default function ReviewerRatingPanel({ sessionId, candidateId, onSaved })
         return (total / METRICS.length).toFixed(1);
     }, [scores]);
 
+    // Function: handleSaveRating - Handles save rating.
     async function handleSaveRating(e) {
         e.preventDefault();
         if (!sessionId || !candidateId || !user?.id) return;

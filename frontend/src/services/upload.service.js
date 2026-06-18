@@ -1,4 +1,8 @@
+// Purpose: Provide reusable service/business logic.
+
 import api from './api';
+
+// Main flow: Execute core operations and return results.
 
 /**
  * Send a single video chunk to the Upload Service.

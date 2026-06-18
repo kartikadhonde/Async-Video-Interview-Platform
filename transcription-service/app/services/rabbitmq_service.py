@@ -1,8 +1,13 @@
+# Purpose: Provide reusable service/business logic.
+
 import os
 import json
 import pika
 
 
+# Main flow: Execute core operations and return results.
+
+# Function: publish_transcript_ready - Publishes transcript ready.
 def publish_transcript_ready(payload: dict):
     url = os.getenv('RABBITMQ_URL', 'amqp://localhost')
     connection = pika.BlockingConnection(pika.URLParameters(url))
@@ -16,4 +21,3 @@ def publish_transcript_ready(payload: dict):
         body=json.dumps(payload),
     )
     connection.close()
-    print(f"Published transcript.ready event: {payload}")

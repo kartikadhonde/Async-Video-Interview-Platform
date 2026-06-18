@@ -1,3 +1,5 @@
+// Purpose: Implement page-level UI and behavior.
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -5,6 +7,8 @@ import api from '../services/api';
 import VideoPlayer from '../components/VideoPlayer';
 import TranscriptViewer from '../components/TranscriptViewer';
 import { formatTimestamp } from '../utils/formatTimestamp';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function AnalyticsDashboard() {
   const [searchParams] = useSearchParams();

@@ -1,5 +1,9 @@
+// Purpose: Render reusable UI components.
+
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+// Main flow: Initialize dependencies and run module logic.
 
 const DEFAULT_LINKS = [
     { to: '/login', label: 'Candidate' },

@@ -1,5 +1,9 @@
+// Purpose: Render reusable UI components.
+
 import React, { useEffect, useRef, useState } from 'react';
 import api from '../services/api';
+
+// Main flow: Initialize dependencies and run module logic.
 
 export default function TranscriptViewer({ videoId, currentTimeMs }) {
   const [transcript, setTranscript] = useState(null); // null = not loaded yet
@@ -15,6 +19,7 @@ export default function TranscriptViewer({ videoId, currentTimeMs }) {
     setStatus('loading');
     setTranscript(null);
 
+    // Function: fetchTranscript - Handles fetch transcript.
     function fetchTranscript() {
       api.get(`/transcription/by-video/${videoId}`)
         .then(({ data }) => {
@@ -42,6 +47,7 @@ export default function TranscriptViewer({ videoId, currentTimeMs }) {
     return () => clearInterval(pollRef.current);
   }, [videoId]);
 
+  // Function: renderSplitByQuestions - Handles render split by questions.
   function renderSplitByQuestions() {
     if (!transcript || !Array.isArray(transcript.segments) || transcript.segments.length === 0) {
       return <p className="text-muted text-sm">No speech detected.</p>;
