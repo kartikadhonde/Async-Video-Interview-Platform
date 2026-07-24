@@ -60,14 +60,19 @@ export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
       recorder.onstop = async () => {
         const finalBlob = new Blob(chunksRef.current, { type: 'video/webm' });
         if (finalBlob.size > 0) {
-          await uploadChunk(
-            finalBlob,
-            sessionId,
-            candidateId,
-            true,
-            candidateName,
-            uploadMeta.questionBoundaries || []
-          );
+          try {
+            await uploadChunk(
+              finalBlob,
+              sessionId,
+              candidateId,
+              true,
+              candidateName,
+              uploadMeta.questionBoundaries || []
+            );
+          } catch (err) {
+            // Surface upload errors to the console; the caller may show UI feedback.
+            console.error('uploadChunk failed', err);
+          }
         }
 
         if (streamRef.current) {
@@ -75,6 +80,8 @@ export function useMediaRecorder(sessionId, candidateId, candidateName = '') {
           streamRef.current = null;
         }
 
+        // free memory references
+        chunksRef.current = [];
         mediaRecorderRef.current = null;
         setRecording(false);
         resolve();

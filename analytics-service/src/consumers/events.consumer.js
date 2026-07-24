@@ -14,9 +14,27 @@ async function bindAndConsume(channel, exchange, handler) {
   await channel.bindQueue(q.queue, exchange, '');
   channel.consume(q.queue, async (msg) => {
     if (!msg) return;
-    const payload = JSON.parse(msg.content.toString());
-    await handler(payload);
-    channel.ack(msg);
+    let payload;
+    try {
+      payload = JSON.parse(msg.content.toString());
+    } catch (err) {
+      console.error('Failed to parse message payload from exchange', exchange, err);
+      try { channel.ack(msg); } catch (e) { console.error('Failed to ack malformed message', e); }
+      return;
+    }
+
+    try {
+      await handler(payload);
+      channel.ack(msg);
+    } catch (err) {
+      console.error('Error handling message from exchange', exchange, err);
+      try {
+        // Do not requeue to avoid poison-message loops
+        channel.nack(msg, false, false);
+      } catch (nackErr) {
+        console.error('Failed to nack message', nackErr);
+      }
+    }
   });
 }
 

@@ -7,4 +7,21 @@ const app = require('./src/app');
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT);
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection at:', reason);
+    process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception thrown', err);
+    process.exit(1);
+});
+
+try {
+    app.listen(PORT, () => {
+        console.log(`gateway listening on port ${PORT}`);
+    });
+} catch (err) {
+    console.error('Failed to start gateway', err);
+    process.exit(1);
+}
